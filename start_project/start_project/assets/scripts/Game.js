@@ -131,9 +131,9 @@ cc.Class({
         var randY = this.groundY + cc.random0To1() * this.player.jumpHeight + 50;
         // 根据屏幕宽度，随机得到一个星星 x 坐标
         var maxX = this.node.width/2;
-        randX = cc.randomMinus1To1() * maxX;
+        randX = cc.randomMinus1To1() * maxX
         // 返回星星坐标
-        return cc.p(randX, randY);
+        return cc.p(randX, randY)
     },
     gainScore: function()
     {
