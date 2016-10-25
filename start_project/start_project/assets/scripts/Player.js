@@ -14,6 +14,10 @@ cc.Class({
 
         jumpHeight: 0,
         jumpDuration: 0,
+        squashDuration: 0.2,
+        strech0Duration: 0.2,
+        strech1Duration: 0.5,
+        scaleBackDuration: 0.4,
         maxMoveSpeed: 0,
         accel: 0,
 
@@ -48,8 +52,21 @@ cc.Class({
         var jumpUp = cc.moveBy(this.jumpDuration, cc.p(0, this.jumpHeight)).easing(cc.easeCubicActionOut());
         // 下落
         var jumpDown = cc.moveBy(this.jumpDuration, cc.p(0, -this.jumpHeight)).easing(cc.easeCubicActionIn());
+        // 形变
+        var squash = cc.scaleTo(this.squashDuration, 1, 0.4)
+        var strech0 = cc.scaleTo(this.strech0Duration, 1, 1.3)
+        var strech1 = cc.scaleTo(this.strech1Duration, 1, 1.6)
+        var scaleBack = cc.scaleTo(this.scaleBackDuration, 1, 1)
+        var callback = cc.callFunc(this.playJumpSound, this)
         // 不断重复
-        return cc.repeatForever(cc.sequence(jumpUp, jumpDown));
+        return cc.repeatForever(cc.sequence(
+            cc.sequence(squash, strech0, cc.spawn(cc.sequence(strech1, scaleBack), jumpUp)),
+            jumpDown,
+            callback
+        ));
+    },
+    playJumpSound () {
+        cc.audioEngine.playEffect(this.jumpAudio)
     },
     setInputControl: function () {
         var self = this;

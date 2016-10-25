@@ -3,7 +3,7 @@
  * @done 加入简单的开始菜单界面，在游戏运行的一开始显示开始按钮，点击按钮后才会开始游戏
  * 为游戏失败加入简单的菜单界面，游戏失败后点击按钮才会重新开始
  * @done 限制主角的移动不能超过视窗边界
- * 为主角的跳跃动作加入更细腻的动画表现
+ * @done 为主角的跳跃动作加入更细腻的动画表现
  * 为星星消失的状态加入计时进度条
  * 收集星星时加入更华丽的效果
  * 为触屏设备加入输入控制
@@ -87,6 +87,7 @@ cc.Class({
         this.groundY = this.ground.y + this.ground.height/2;
         this.player.game = this;
         this.hideGameFailed()
+        // this.gameFailed.node.active = false
     },
     hideGameFailed () { 
         this.gameFailed.node.runAction(cc.hide())
@@ -97,13 +98,15 @@ cc.Class({
         this.timer        = 0;
         this.starDuration = 0;
         this.running      = true;
-        this.playBtn.setPositionX(this.node.height);
+        this.playBtn.active = false
+        // this.gameFailed.node.active = false
+        this.hideGameFailed()
+        this.gameFailed.node.runAction(cc.rotateTo(0.1, 0, 0))
         this.player.node.setPositionY(this.groundY);
         // 初始化计分
         this.score = 0;
         // 生成一个新的星星
         this.spawnNewStar();
-        this.gameFailed.node.setPositionX(0);
         this.player.onStartGame();
     },
 
@@ -163,11 +166,14 @@ cc.Class({
         var jumpUp = cc.moveBy(this.player.jumpDuration, cc.p(0,160)).easing(cc.easeCubicActionOut());
         // 下落
         var jumpDown = cc.moveBy(this.player.jumpDuration, cc.p(0, -160)).easing(cc.easeCubicActionIn());
+        
+        // this.gameFailed.node.active = true
+        this.playBtn.active = true
         this.gameFailed.node.runAction(cc.sequence(
             cc.show(),
             cc.spawn(
                 cc.sequence(cc.scaleTo(0.25, 3, 2), cc.scaleTo(0.125, 0.3, 0.5), cc.scaleTo(0.125, 1, 1)),
-                cc.sequence(cc.rotateBy(0.5, -360*1.9))
+                cc.sequence(cc.rotateBy(0.5, -360*2.1))
             ),
         ));
         
