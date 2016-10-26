@@ -90,6 +90,9 @@
       },
       {
         "__id__": 27
+      },
+      {
+        "__id__": 29
       }
     ],
     "_rotationX": 0,
@@ -111,10 +114,10 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 29
+        "__id__": 34
       },
       {
-        "__id__": 30
+        "__id__": 35
       }
     ],
     "_prefab": null,
@@ -426,6 +429,10 @@
     "_enabled": true,
     "jumpHeight": 200,
     "jumpDuration": 1,
+    "squashDuration": 0.1,
+    "strech0Duration": 0.2,
+    "strech1Duration": 0.3,
+    "scaleBackDuration": 0.6,
     "maxMoveSpeed": 400,
     "accel": 350,
     "jumpAudio": {
@@ -480,7 +487,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 281,
+      "width": 216.67000000000002,
       "height": 50
     },
     "_children": [
@@ -552,7 +559,7 @@
     "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": -76.5,
+      "x": -33.33500000000001,
       "y": 7.219999999999999
     },
     "_skewX": 0,
@@ -626,7 +633,7 @@
     "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": 76.5,
+      "x": 87.5,
       "y": 2.780000000000001
     },
     "_skewX": 0,
@@ -677,7 +684,7 @@
     "_enabled": true,
     "_layoutSize": {
       "__type__": "cc.Size",
-      "width": 281,
+      "width": 216.67000000000002,
       "height": 50
     },
     "_resize": 1,
@@ -1037,6 +1044,133 @@
     "_N$overflow": 0
   },
   {
+    "__type__": "cc.Node",
+    "_name": "scoreFX",
+    "_objFlags": 0,
+    "_opacity": 255,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 255
+    },
+    "_cascadeOpacityEnabled": true,
+    "_parent": {
+      "__id__": 2
+    },
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 66.67,
+      "height": 44.44
+    },
+    "_children": [],
+    "_rotationX": 0,
+    "_rotationY": 0,
+    "_scaleX": 1,
+    "_scaleY": 1,
+    "_position": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_skewX": 0,
+    "_skewY": 0,
+    "_localZOrder": 0,
+    "_globalZOrder": 0,
+    "_tag": -1,
+    "_opacityModifyRGB": false,
+    "_id": "a3fc5mRZ1FDuqNfn8QtzR6U",
+    "_active": true,
+    "_components": [
+      {
+        "__id__": 30
+      },
+      {
+        "__id__": 31
+      },
+      {
+        "__id__": 32
+      }
+    ],
+    "_prefab": {
+      "__id__": 33
+    },
+    "groupIndex": 0
+  },
+  {
+    "__type__": "cc.Animation",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 29
+    },
+    "_enabled": true,
+    "_defaultClip": {
+      "__uuid__": "ef59c2c7-9fa4-49b1-88cd-0c53e640dc97"
+    },
+    "_clips": [
+      {
+        "__uuid__": "ef59c2c7-9fa4-49b1-88cd-0c53e640dc97"
+      }
+    ],
+    "playOnLoad": false
+  },
+  {
+    "__type__": "cc.Label",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 29
+    },
+    "_enabled": true,
+    "_useOriginalSize": false,
+    "_actualFontSize": 40,
+    "_fontSize": 40,
+    "_lineHeight": 40,
+    "_enableWrapText": true,
+    "_N$file": {
+      "__uuid__": "977cfe9b-21c7-498e-b060-541800511a8b"
+    },
+    "_isSystemFontUsed": false,
+    "_N$string": "+1 !",
+    "_N$horizontalAlign": 0,
+    "_N$verticalAlign": 0,
+    "_N$overflow": 0
+  },
+  {
+    "__type__": "cc.AudioSource",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 29
+    },
+    "_enabled": true,
+    "_clip": {
+      "__uuid__": "55d110b9-bab6-4d9d-9416-03e46904fa35"
+    },
+    "_volume": 1,
+    "_mute": false,
+    "_loop": false,
+    "playOnLoad": false
+  },
+  {
+    "__type__": "cc.PrefabInfo",
+    "root": {
+      "__id__": 29
+    },
+    "asset": {
+      "__uuid__": "75aa12e6-b339-43bb-9ef0-0f92ab5adb1b"
+    },
+    "fileId": "a3fc5mRZ1FDuqNfn8QtzR6U",
+    "sync": false
+  },
+  {
     "__type__": "cc.Canvas",
     "_name": "",
     "_objFlags": 0,
@@ -1064,7 +1198,7 @@
       "__uuid__": "508400ea-d1cb-4f9e-bb36-f3ca9e4c8cea"
     },
     "maxStarDuration": 1,
-    "minStarDuration": 2,
+    "minStarDuration": 1,
     "ground": {
       "__id__": 6
     },
