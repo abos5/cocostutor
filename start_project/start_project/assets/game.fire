@@ -93,6 +93,9 @@
       },
       {
         "__id__": 29
+      },
+      {
+        "__id__": 34
       }
     ],
     "_rotationX": 0,
@@ -114,10 +117,10 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 34
+        "__id__": 36
       },
       {
-        "__id__": 35
+        "__id__": 37
       }
     ],
     "_prefab": null,
@@ -487,7 +490,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 216.67000000000002,
+      "width": 281,
       "height": 50
     },
     "_children": [
@@ -559,7 +562,7 @@
     "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": -33.33500000000001,
+      "x": -76.5,
       "y": 7.219999999999999
     },
     "_skewX": 0,
@@ -633,7 +636,7 @@
     "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": 87.5,
+      "x": 76.5,
       "y": 2.780000000000001
     },
     "_skewX": 0,
@@ -684,7 +687,7 @@
     "_enabled": true,
     "_layoutSize": {
       "__type__": "cc.Size",
-      "width": 216.67000000000002,
+      "width": 281,
       "height": 50
     },
     "_resize": 1,
@@ -831,6 +834,7 @@
       "a": 255
     },
     "duration": 0.3,
+    "zoomScale": 1.2,
     "pressedSprite": null,
     "hoverSprite": null,
     "clickEvents": [
@@ -839,6 +843,7 @@
       }
     ],
     "_N$interactable": true,
+    "_N$enableAutoGrayEffect": false,
     "_N$normalColor": {
       "__type__": "cc.Color",
       "r": 214,
@@ -865,7 +870,8 @@
       "__id__": 2
     },
     "component": "Game",
-    "handler": "onStartGame"
+    "handler": "onStartGame",
+    "customEventData": ""
   },
   {
     "__type__": "cc.Node",
@@ -1111,14 +1117,8 @@
       "__id__": 29
     },
     "_enabled": true,
-    "_defaultClip": {
-      "__uuid__": "ef59c2c7-9fa4-49b1-88cd-0c53e640dc97"
-    },
-    "_clips": [
-      {
-        "__uuid__": "ef59c2c7-9fa4-49b1-88cd-0c53e640dc97"
-      }
-    ],
+    "_defaultClip": null,
+    "_clips": [],
     "playOnLoad": false
   },
   {
@@ -1157,18 +1157,93 @@
     "_volume": 1,
     "_mute": false,
     "_loop": false,
-    "playOnLoad": false
+    "playOnLoad": false,
+    "preload": false
   },
   {
     "__type__": "cc.PrefabInfo",
     "root": {
       "__id__": 29
     },
-    "asset": {
-      "__uuid__": "75aa12e6-b339-43bb-9ef0-0f92ab5adb1b"
-    },
+    "asset": null,
     "fileId": "a3fc5mRZ1FDuqNfn8QtzR6U",
     "sync": false
+  },
+  {
+    "__type__": "cc.Node",
+    "_name": "foo",
+    "_objFlags": 0,
+    "_opacity": 255,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 255
+    },
+    "_cascadeOpacityEnabled": true,
+    "_parent": {
+      "__id__": 2
+    },
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 0,
+      "height": 0
+    },
+    "_children": [],
+    "_rotationX": 0,
+    "_rotationY": 0,
+    "_scaleX": 1,
+    "_scaleY": 1,
+    "_position": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_skewX": 0,
+    "_skewY": 0,
+    "_localZOrder": 0,
+    "_globalZOrder": 0,
+    "_tag": -1,
+    "_opacityModifyRGB": false,
+    "_id": "66080x2rqdBvKlYnACOpDQU",
+    "_active": true,
+    "_components": [
+      {
+        "__id__": 35
+      }
+    ],
+    "_prefab": null,
+    "groupIndex": 0
+  },
+  {
+    "__type__": "cc.Sprite",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 34
+    },
+    "_enabled": true,
+    "_spriteFrame": null,
+    "_type": 0,
+    "_sizeMode": 1,
+    "_fillType": 0,
+    "_fillCenter": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_fillStart": 0,
+    "_fillRange": 0,
+    "_isTrimmedMode": true,
+    "_srcBlendFactor": 770,
+    "_dstBlendFactor": 771,
+    "_atlas": null
   },
   {
     "__type__": "cc.Canvas",
@@ -1200,7 +1275,7 @@
     "maxStarDuration": 1,
     "minStarDuration": 1,
     "ground": {
-      "__id__": 6
+      "__id__": 7
     },
     "player": {
       "__id__": 11

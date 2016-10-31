@@ -84,8 +84,10 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
+        // this.io = socketio('ws://socketio.node.abos.space:3000/chat')
         // 获取地平面的 y 轴坐标
-        this.groundY = this.ground.y + this.ground.height/2;
+        this.groundY = this.ground.node.y + this.ground.node.height/2;
+        
         this.player.game = this;
         this.hideGameFailed()
         // this.gameFailed.node.active = false
@@ -95,6 +97,21 @@ cc.Class({
     },
     onStartGame: function() {
 
+        var st = io.connect('ws://socketio.node.abos.space');
+        // st.on("message", this.message.bind(this));
+        st.on('connect', function(){
+            cc.log('connected')
+        });
+        function() {
+            
+        }
+        st.on('message', function(msg){
+            cc.log(msg)
+        });
+        st.on('disconnect', function() {
+            cc.log('disconnected')
+        }) 
+        
         // 初始化计时器
         this.timer        = 0;
         this.starDuration = 0;
