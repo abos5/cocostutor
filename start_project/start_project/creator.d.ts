@@ -1040,6 +1040,9 @@ declare module cc {
 	!#zh cc.winSize 为当前的游戏窗口的大小。 */
 	export var winSize : Size;	
 	export var game : Game;	
+	export var dragonBonesJson : string;	
+	export var atlasJson : string;	
+	export var texture : Texture2D;	
 	/** Checks whether subclass is child of superclass or equals to superclass 
 	*/
 	export function isChildClassOf(subclass : Function, superclass : Function) : boolean;	
@@ -1093,7 +1096,7 @@ declare module cc {
 	};
 	``` 
 	*/
-	export function Class(options : { name?; extends?; ctor?; properties?; statics?; mixins?; editor? : { requireComponent? : Component; disallowMultiple? : Component; menu? : string; executeInEditMode? : boolean; playOnFocus? : boolean; inspector? : string; icon? : string; help? : string; } ; update?; lateUpdate?; onLoad?; start?; onEnable?; onDisable?; onDestroy?; onFocusInEditor?; onLostFocusInEditor?; onRestore?; _getLocalBounds?; }) : Function;	
+	export function Class(options : { name?; extends?; ctor?; properties?; statics?; mixins?; editor? : { requireComponent? : Component; disallowMultiple? : Component; menu? : string; executeInEditMode? : boolean; playOnFocus? : boolean; inspector? : string; icon? : string; help? : string; } ; update?; lateUpdate?; onLoad?; start?; onEnable?; onDisable?; onDestroy?; onFocusInEditor?; onLostFocusInEditor?; resetInEditor?; onRestore?; _getLocalBounds?; }) : Function;	
 	/** Return all super classes 
 	*/
 	export function getInheritanceChain(constructor : Function) : Function[];	
@@ -1878,212 +1881,134 @@ declare module cc {
 		WARN_FOR_WEB_PAGE = 0,
 		ERROR_FOR_WEB_PAGE = 0,	
 	}		
-		/** !#en cc.audioEngine is the singleton object, it provide simple audio APIs.
+		/** !#en Class for animation data handling.
+		!#zh 动画剪辑，用于存储动画数据。 */
+		export class AnimationClip extends Asset {		
+		/** !#en Duration of this animation.
+		!#zh 动画的持续时间。 */
+		duration : number;		
+		/** !#en FrameRate of this animation.
+		!#zh 动画的帧速率。 */
+		sample : number;		
+		/** !#en Speed of this animation.
+		!#zh 动画的播放速度。 */
+		speed : number;		
+		/** !#en WrapMode of this animation.
+		!#zh 动画的循环模式。 */
+		wrapMode : WrapMode;		
+		/** !#en Curve data.
+		!#zh 曲线数据。 */
+		curveData : any;		
+		/** !#en Event data.
+		!#zh 事件数据。 */
+		events : any[];		
+		/** !#en Crate clip with a set of sprite frames
+		!#zh 使用一组序列帧图片来创建动画剪辑
+		
+		@example 
+		```js
+		var clip = cc.AnimationClip.createWithSpriteFrames(spriteFrames, 10);
+		``` 
+		*/
+		createWithSpriteFrames(spriteFrames : [SpriteFrame], sample : number) : AnimationClip;	
+	}		
+		/** !#en
+		The AnimationState gives full control over animation playback process.
+		In most cases the Animation Component is sufficient and easier to use. Use the AnimationState if you need full control.
 		!#zh
-		cc.audioengine是单例对象。<br/>
-		主要用来播放背景音乐和音效，背景音乐同一时间只能播放一个，而音效则可以同时播放多个。<br/>
-		注意：<br/>
-		在 Android 系统浏览器上，不同浏览器，不同版本的效果不尽相同。<br/>
-		比如说：大多数浏览器都需要用户物理交互才可以开始播放音效，有一些不支持 WebAudio，<br/>
-		有一些不支持多音轨播放。总之如果对音乐依赖比较强，请做尽可能多的测试。 */
-		export class audioEngine {		
-		/** !#en Play music.
+		AnimationState 完全控制动画播放过程。<br/>
+		大多数情况下 动画组件 是足够和易于使用的。如果您需要更多的动画控制接口，请使用 AnimationState。 */
+		export class AnimationState extends AnimationNode {		
+		/**  
+		*/
+		AnimationState(clip : AnimationClip, name? : string) : AnimationState;		
+		/** !#en The clip that is being played by this animation state.
+		!#zh 此动画状态正在播放的剪辑。 */
+		clip : AnimationClip;		
+		/** !#en The name of the playing animation.
+		!#zh 动画的名字 */
+		name : string;	
+	}		
+		/** undefined */
+		export class Playable {		
+		/** !#en Is playing or paused in play mode?
+		!#zh 当前是否正在播放。 */
+		isPlaying : boolean;		
+		/** !#en Is currently paused? This can be true even if in edit mode(isPlaying == false).
+		!#zh 当前是否正在暂停 */
+		isPaused : boolean;		
+		/** !#en Play this animation.
+		!#zh 播放动画。 
+		*/
+		play() : void;		
+		/** !#en Stop this animation.
+		!#zh 停止动画播放。 
+		*/
+		stop() : void;		
+		/** !#en Pause this animation.
+		!#zh 暂停动画。 
+		*/
+		pause() : void;		
+		/** !#en Resume this animation.
+		!#zh 重新播放动画。 
+		*/
+		resume() : void;		
+		/** !#en Perform a single frame step.
+		!#zh 执行一帧动画。 
+		*/
+		step() : void;	
+	}	
+	/** !#en Specifies how time is treated when it is outside of the keyframe range of an Animation.
+	!#zh 动画使用的循环模式。 */
+	export enum WrapMode {		
+		Default = 0,
+		Normal = 0,
+		Reverse = 0,
+		Loop = 0,
+		LoopReverse = 0,
+		PingPong = 0,
+		PingPongReverse = 0,	
+	}		
+		/** !#en The abstract interface for all playing animation.
+		!#zh 所有播放动画的抽象接口。 */
+		export class AnimationNodeBase extends Playable {	
+	}		
+		/** !#en The collection and instance of playing animations.
+		!#zh 动画曲线的集合，根据当前时间计算出每条曲线的状态。 */
+		export class AnimationNode extends AnimationNodeBase {		
+		/** !#en The curves list.
+		!#zh 曲线列表。 */
+		curves : AnimCurve[];		
+		/** !#en The start delay which represents the number of seconds from an animation's start time to the start of
+		the active interval.
+		!#zh 延迟多少秒播放。 */
+		delay : number;		
+		/** !#en The animation's iteration count property.
+		
+		A real number greater than or equal to zero (including positive infinity) representing the number of times
+		to repeat the animation node.
+		
+		Values less than zero and NaN values are treated as the value 1.0 for the purpose of timing model
+		calculations.
+		
+		!#zh 迭代次数，指动画播放多少次后结束, normalize time。 如 2.5（2次半） */
+		repeatCount : number;		
+		/** !#en The iteration duration of this animation in seconds. (length)
+		!#zh 单次动画的持续时间，秒。 */
+		duration : number;		
+		/** !#en The animation's playback speed. 1 is normal playback speed.
+		!#zh 播放速率。 */
+		speed : number;		
+		/** !#en
+		Wrapping mode of the playing animation.
+		Notice : dynamic change wrapMode will reset time and repeatCount property
 		!#zh
-		播放指定音乐，并可以设置是否循环播放。<br/>
-		注意：音乐播放接口不支持多音轨，同一时间只能播放一个音乐。
-		@param url The path of the music file without filename extension.
-		@param loop Whether the music loop or not.
-		
-		@example 
-		```js
-		//example
-		cc.audioEngine.playMusic(path, false);
-		``` 
-		*/
-		playMusic(url : string, loop : boolean) : void;		
-		/** !#en Stop playing music.
-		!#zh 停止当前音乐。
-		@param releaseData If release the music data or not.As default value is false.
-		
-		@example 
-		```js
-		//example
-		cc.audioEngine.stopMusic();
-		``` 
-		*/
-		stopMusic(releaseData? : boolean) : void;		
-		/** !#en Pause playing music.
-		!#zh 暂停正在播放音乐。
-		
-		@example 
-		```js
-		//example
-		cc.audioEngine.pauseMusic();
-		``` 
-		*/
-		pauseMusic() : void;		
-		/** !#en Resume playing music.
-		!#zh 恢复音乐播放。
-		
-		@example 
-		```js
-		//example
-		cc.audioEngine.resumeMusic();
-		``` 
-		*/
-		resumeMusic() : void;		
-		/** !#en Rewind playing music.
-		!#zh 从头开始重新播放当前音乐。
-		
-		@example 
-		```js
-		//example
-		cc.audioEngine.rewindMusic();
-		``` 
-		*/
-		rewindMusic() : void;		
-		/** !#en The volume of the music max value is 1.0,the min value is 0.0 .
-		!#zh 获取音量（0.0 ~ 1.0）。
-		
-		@example 
-		```js
-		//example
-		var volume = cc.audioEngine.getMusicVolume();
-		``` 
-		*/
-		getMusicVolume() : number;		
-		/** !#en Set the volume of music.
-		!#zh 设置音量（0.0 ~ 1.0）。
-		@param volume Volume must be in 0.0~1.0 .
-		
-		@example 
-		```js
-		//example
-		cc.audioEngine.setMusicVolume(0.5);
-		``` 
-		*/
-		setMusicVolume(volume : number) : void;		
-		/** !#en Whether the music is playing.
-		!#zh 音乐是否正在播放。
-		
-		@example 
-		```js
-		//example
-		 if (cc.audioEngine.isMusicPlaying()) {
-		     cc.log("music is playing");
-		 }
-		 else {
-		     cc.log("music is not playing");
-		 }
-		``` 
-		*/
-		isMusicPlaying() : boolean;		
-		/** !#en Play sound effect.
-		!#zh
-		播放指定音效，并可以设置是否循环播放。<br/>
-		注意：在部分不支持多音轨的浏览器上，这个接口会失效，请使用 playMusic
-		@param url The path of the sound effect with filename extension.
-		@param loop Whether to loop the effect playing, default value is false
-		
-		@example 
-		```js
-		//example
-		var soundId = cc.audioEngine.playEffect(path);
-		``` 
-		*/
-		playEffect(url : string, loop : boolean, volume : boolean) : number;		
-		/** !#en Set the volume of sound effects.
-		!#zh 设置音效音量（0.0 ~ 1.0）。
-		@param volume Volume must be in 0.0~1.0 .
-		
-		@example 
-		```js
-		//example
-		cc.audioEngine.setEffectsVolume(0.5);
-		``` 
-		*/
-		setEffectsVolume(volume : number) : void;		
-		/** !#en The volume of the effects max value is 1.0,the min value is 0.0 .
-		!#zh 获取音效音量（0.0 ~ 1.0）。
-		
-		@example 
-		```js
-		//example
-		var effectVolume = cc.audioEngine.getEffectsVolume();
-		``` 
-		*/
-		getEffectsVolume() : number;		
-		/** !#en Pause playing sound effect.
-		!#zh 暂停指定的音效。
-		@param audio The return value of function playEffect.
-		
-		@example 
-		```js
-		//example
-		cc.audioEngine.pauseEffect(audioID);
-		``` 
-		*/
-		pauseEffect(audio : number) : void;		
-		/** !#en Pause all playing sound effect.
-		!#zh 暂停现在正在播放的所有音效。
-		
-		@example 
-		```js
-		//example
-		cc.audioEngine.pauseAllEffects();
-		``` 
-		*/
-		pauseAllEffects() : void;		
-		/** !#en Resume playing sound effect.
-		!#zh 恢复播放指定的音效。
-		@param audioID The return value of function playEffect. 
-		*/
-		resumeEffect(audioID : number) : void;		
-		/** !#en Resume all playing sound effect.
-		!#zh 恢复播放所有之前暂停的所有音效。
-		
-		@example 
-		```js
-		//example
-		cc.audioEngine.resumeAllEffects();
-		``` 
-		*/
-		resumeAllEffects() : void;		
-		/** !#en Stop playing sound effect.
-		!#zh 停止播放指定音效。
-		@param audioID The return value of function playEffect.
-		
-		@example 
-		```js
-		//example
-		cc.audioEngine.stopEffect(audioID);
-		``` 
-		*/
-		stopEffect(audioID : number) : void;		
-		/** !#en Stop all playing sound effects.
-		!#zh 停止正在播放的所有音效。
-		
-		@example 
-		```js
-		//example
-		cc.audioEngine.stopAllEffects();
-		``` 
-		*/
-		stopAllEffects() : void;		
-		/** !#en Unload the preloaded effect from internal buffer.
-		!#zh 卸载预加载的音效。
-		
-		@example 
-		```js
-		//example
-		cc.audioEngine.unloadEffect(EFFECT_FILE);
-		``` 
-		*/
-		unloadEffect(url : string) : void;		
-		/** !#en End music and effects.
-		!#zh 停止所有音乐和音效的播放。 
-		*/
-		end() : void;	
+		动画循环方式。
+		需要注意的是，动态修改 wrapMode 时，会重置 time 以及 repeatCount */
+		wrapMode : WrapMode;		
+		/** !#en The current time of this animation in seconds.
+		!#zh 动画当前的时间，秒。 */
+		time : number;	
 	}		
 		/** !#en Base class cc.Action for action classes.
 		!#zh Action 类是所有动作类型的基类。 */
@@ -2213,142 +2138,255 @@ declare module cc {
 		*/
 		repeatForever() : ActionInterval;	
 	}		
-		/** !#en Class for animation data handling.
-		!#zh 动画剪辑，用于存储动画数据。 */
-		export class AnimationClip extends Asset {		
-		constructor();		
-		/** !#en Duration of this animation.
-		!#zh 动画的持续时间。 */
-		duration : number;		
-		/** !#en FrameRate of this animation.
-		!#zh 动画的帧速率。 */
-		sample : number;		
-		/** !#en Speed of this animation.
-		!#zh 动画的播放速度。 */
-		speed : number;		
-		/** !#en WrapMode of this animation.
-		!#zh 动画的循环模式。 */
-		wrapMode : WrapMode;		
-		/** !#en Curve data.
-		!#zh 曲线数据。 */
-		curveData : any;		
-		/** !#en Event data.
-		!#zh 事件数据。 */
-		events : any[];		
-		/** !#en Crate clip with a set of sprite frames
-		!#zh 使用一组序列帧图片来创建动画剪辑
+		/** !#en cc.audioEngine is the singleton object, it provide simple audio APIs.
+		!#zh
+		cc.audioengine是单例对象。<br/>
+		主要用来播放音频，播放的时候会返回一个 audioID，之后都可以通过这个 audioID 来操作这个音频对象。<br/>
+		不使用的时候，请使用 cc.audioEngine.uncache(filePath); 进行资源释放 <br/>
+		注意：<br/>
+		在 Android 系统浏览器上，不同浏览器，不同版本的效果不尽相同。<br/>
+		比如说：大多数浏览器都需要用户物理交互才可以开始播放音效，有一些不支持 WebAudio，<br/>
+		有一些不支持多音轨播放。总之如果对音乐依赖比较强，请做尽可能多的测试。 */
+		export class audioEngine {		
+		/** !#en Play audio.
+		!#zh 播放音频
+		@param filePath The path of the audio file without filename extension.
+		@param loop Whether the music loop or not.
+		@param volume Volume size.
 		
 		@example 
 		```js
-		var clip = cc.AnimationClip.createWithSpriteFrames(spriteFrames, 10);
+		//example
+		var audioID = cc.audioEngine.play(path, false, 0.5);
 		``` 
 		*/
-		createWithSpriteFrames(spriteFrames : [SpriteFrame], sample : number) : AnimationClip;	
-	}		
-		/** !#en
-		The AnimationState gives full control over animation playback process.
-		In most cases the Animation Component is sufficient and easier to use. Use the AnimationState if you need full control.
-		!#zh
-		AnimationState 完全控制动画播放过程。<br/>
-		大多数情况下 动画组件 是足够和易于使用的。如果您需要更多的动画控制接口，请使用 AnimationState。 */
-		export class AnimationState extends AnimationNode {		
-		constructor();		
-		/**  
-		*/
-		AnimationState(clip : AnimationClip, name? : string) : AnimationState;		
-		/** !#en The clip that is being played by this animation state.
-		!#zh 此动画状态正在播放的剪辑。 */
-		clip : AnimationClip;		
-		/** !#en The name of the playing animation.
-		!#zh 动画的名字 */
-		name : string;	
-	}		
-		/** undefined */
-		export class Playable {		
-		constructor();		
-		/** !#en Is playing or paused in play mode?
-		!#zh 当前是否正在播放。 */
-		isPlaying : boolean;		
-		/** !#en Is currently paused? This can be true even if in edit mode(isPlaying == false).
-		!#zh 当前是否正在暂停 */
-		isPaused : boolean;		
-		/** !#en Play this animation.
-		!#zh 播放动画。 
-		*/
-		play() : void;		
-		/** !#en Stop this animation.
-		!#zh 停止动画播放。 
-		*/
-		stop() : void;		
-		/** !#en Pause this animation.
-		!#zh 暂停动画。 
-		*/
-		pause() : void;		
-		/** !#en Resume this animation.
-		!#zh 重新播放动画。 
-		*/
-		resume() : void;		
-		/** !#en Perform a single frame step.
-		!#zh 执行一帧动画。 
-		*/
-		step() : void;	
-	}	
-	/** !#en Specifies how time is treated when it is outside of the keyframe range of an Animation.
-	!#zh 动画使用的循环模式。 */
-	export enum WrapMode {		
-		Default = 0,
-		Normal = 0,
-		Reverse = 0,
-		Loop = 0,
-		LoopReverse = 0,
-		PingPong = 0,
-		PingPongReverse = 0,	
-	}		
-		/** !#en The abstract interface for all playing animation.
-		!#zh 所有播放动画的抽象接口。 */
-		export class AnimationNodeBase extends Playable {		
-		constructor();	
-	}		
-		/** !#en The collection and instance of playing animations.
-		!#zh 动画曲线的集合，根据当前时间计算出每条曲线的状态。 */
-		export class AnimationNode extends AnimationNodeBase {		
-		/** 
-		@param timingInput This dictionary is used as a convenience for specifying the timing properties of an Animation in bulk. 
-		*/
-		constructor(animator : Animator, curves? : AnimCurve[], timingInput? : any);		
-		/** !#en The curves list.
-		!#zh 曲线列表。 */
-		curves : AnimCurve[];		
-		/** !#en The start delay which represents the number of seconds from an animation's start time to the start of
-		the active interval.
-		!#zh 延迟多少秒播放。 */
-		delay : number;		
-		/** !#en The animation's iteration count property.
+		play(filePath : string, loop : boolean, volume : number) : number;		
+		/** !#en Set audio loop.
+		!#zh 设置音频是否循环。
+		@param audioID audio id.
+		@param loop Whether cycle.
 		
-		A real number greater than or equal to zero (including positive infinity) representing the number of times
-		to repeat the animation node.
+		@example 
+		```js
+		//example
+		cc.audioEngine.setLoop(id, true);
+		``` 
+		*/
+		setLoop(audioID : number, loop : boolean) : void;		
+		/** !#en Get audio cycle state.
+		!#zh 获取音频的循环状态。
+		@param audioID audio id.
 		
-		Values less than zero and NaN values are treated as the value 1.0 for the purpose of timing model
-		calculations.
+		@example 
+		```js
+		//example
+		cc.audioEngine.isLoop(id);
+		``` 
+		*/
+		isLoop(audioID : number) : boolean;		
+		/** !#en Set the volume of audio.
+		!#zh 设置音量（0.0 ~ 1.0）。
+		@param audioID audio id.
+		@param volume Volume must be in 0.0~1.0 .
 		
-		!#zh 迭代次数，指动画播放多少次后结束, normalize time。 如 2.5（2次半） */
-		repeatCount : number;		
-		/** !#en The iteration duration of this animation in seconds. (length)
-		!#zh 单次动画的持续时间，秒。 */
-		duration : number;		
-		/** !#en The animation's playback speed. 1 is normal playback speed.
-		!#zh 播放速率。 */
-		speed : number;		
-		/** !#en
-		Wrapping mode of the playing animation.
-		Notice : dynamic change wrapMode will reset time and repeatCount property
-		!#zh
-		动画循环方式。
-		需要注意的是，动态修改 wrapMode 时，会重置 time 以及 repeatCount */
-		wrapMode : WrapMode;		
-		/** !#en The current time of this animation in seconds.
-		!#zh 动画当前的时间，秒。 */
-		time : number;	
+		@example 
+		```js
+		//example
+		cc.audioEngine.setVolume(0.5);
+		``` 
+		*/
+		setVolume(audioID : number, volume : number) : void;		
+		/** !#en The volume of the music max value is 1.0,the min value is 0.0 .
+		!#zh 获取音量（0.0 ~ 1.0）。
+		@param audioID audio id.
+		
+		@example 
+		```js
+		//example
+		var volume = cc.audioEngine.getVolume(id);
+		``` 
+		*/
+		getVolume(audioID : number) : boolean;		
+		/** !#en Set current time
+		!#zh 设置当前的音频时间。
+		@param audioID audio id.
+		@param sec current time.
+		
+		@example 
+		```js
+		//example
+		cc.audioEngine.setCurrentTime(id, 2);
+		``` 
+		*/
+		setCurrentTime(audioID : number, sec : number) : boolean;		
+		/** !#en Get current time
+		!#zh 获取当前的音频播放时间。
+		@param audioID audio id.
+		
+		@example 
+		```js
+		//example
+		var time = cc.audioEngine.getCurrentTime(id);
+		``` 
+		*/
+		getCurrentTime(audioID : number) : number;		
+		/** !#en Get audio duration
+		!#zh 获取音频总时长。
+		@param audioID audio id.
+		
+		@example 
+		```js
+		//example
+		var time = cc.audioEngine.getDuration(id);
+		``` 
+		*/
+		getDuration(audioID : number) : number;		
+		/** !#en Get audio state
+		!#zh 获取音频状态。
+		@param audioID audio id.
+		
+		@example 
+		```js
+		//example
+		var state = cc.audioEngine.getState(id);
+		``` 
+		*/
+		getState(audioID : number) : audioEngine.AudioState;		
+		/** !#en Get audio state
+		!#zh 获取音频状态。
+		@param audioID audio id.
+		@param callback loaded callback.
+		
+		@example 
+		```js
+		//example
+		cc.audioEngine.setFinishCallback(id, function () {});
+		``` 
+		*/
+		getState(audioID : number, callback : Function) : void;		
+		/** !#en Pause playing audio.
+		!#zh 暂停正在播放音频。
+		@param audioID The return value of function play.
+		
+		@example 
+		```js
+		//example
+		cc.audioEngine.pause(audioID);
+		``` 
+		*/
+		pause(audioID : number) : void;		
+		/** !#en Pause all playing audio
+		!#zh 暂停现在正在播放的所有音频。
+		
+		@example 
+		```js
+		//example
+		cc.audioEngine.pauseAll();
+		``` 
+		*/
+		pauseAll() : void;		
+		/** !#en Resume playing audio.
+		!#zh 恢复播放指定的音频。
+		@param audioID The return value of function play.
+		//example
+		cc.audioEngine.resume(audioID); 
+		*/
+		resume(audioID : number) : void;		
+		/** !#en Resume all playing audio.
+		!#zh 恢复播放所有之前暂停的所有音频。
+		
+		@example 
+		```js
+		//example
+		cc.audioEngine.resumeAll();
+		``` 
+		*/
+		resumeAll() : void;		
+		/** !#en Stop playing audio.
+		!#zh 停止播放指定音频。
+		@param audioID The return value of function play.
+		
+		@example 
+		```js
+		//example
+		cc.audioEngine.stop(audioID);
+		``` 
+		*/
+		stop(audioID : number) : void;		
+		/** !#en Stop all playing audio.
+		!#zh 停止正在播放的所有音频。
+		
+		@example 
+		```js
+		//example
+		cc.audioEngine.stopAll();
+		``` 
+		*/
+		stopAll() : void;		
+		/** !#en Set up an audio can generate a few examples.
+		!#zh 设置一个音频可以设置几个实例
+		@param num a number of instances to be created from within an audio
+		
+		@example 
+		```js
+		//example
+		cc.audioEngine.setMaxAudioInstance(20);
+		``` 
+		*/
+		setMaxAudioInstance(num : number) : void;		
+		/** !#en Getting audio can produce several examples.
+		!#zh 获取一个音频可以设置几个实例
+		
+		@example 
+		```js
+		//example
+		cc.audioEngine.getMaxAudioInstance();
+		``` 
+		*/
+		getMaxAudioInstance() : number;		
+		/** !#en Unload the preloaded audio from internal buffer.
+		!#zh 卸载预加载的音频。
+		
+		@example 
+		```js
+		//example
+		cc.audioEngine.uncache(filePath);
+		``` 
+		*/
+		uncache(filePath : string) : void;		
+		/** !#en Unload all audio from internal buffer.
+		!#zh 卸载所有音频。
+		
+		@example 
+		```js
+		//example
+		cc.audioEngine.uncacheAll();
+		``` 
+		*/
+		uncacheAll() : void;		
+		/** !#en Preload audio file.
+		!#zh 预加载一个音频
+		@param filePath The file path of an audio.
+		@param callback The callback of an audio.
+		
+		@example 
+		```js
+		//example
+		cc.audioEngine.preload(path);
+		``` 
+		*/
+		preload(filePath : void, callback : void) : void;		
+		/** !#en Set a size, the unit is KB，Over this size is directly resolved into DOM nodes
+		!#zh 设置一个以kb为单位的尺寸，大于这个尺寸的音频在加载的时候会强制使用 dom 方式加载
+		@param kb The file path of an audio.
+		
+		@example 
+		```js
+		//example
+		cc.audioEngine.setMaxWebAudioSize(300);
+		``` 
+		*/
+		setMaxWebAudioSize(kb : void) : void;	
 	}		
 		/** !#en
 		cc.ActionManager is a class that can manage actions.<br/>
@@ -2415,7 +2453,7 @@ declare module cc {
 		 - 如果您正在运行 7 个动作组成的序列动作（Sequence），这个函数将返回 1。<br/>
 		 - 如果你正在运行 2 个序列动作（Sequence）和 5 个普通动作，这个函数将返回 7。<br/> 
 		*/
-		numberOfRunningActionsInTarget(target : any) : number;		
+		getNumberOfRunningActionsInTarget(target : any) : number;		
 		/** !#en Pauses the target: all running actions and newly added actions will be paused.
 		!#zh 暂停指定对象：所有正在运行的动作和新添加的动作都将会暂停。 
 		*/
@@ -2810,6 +2848,10 @@ declare module cc {
 		!#zh 重新开始游戏 
 		*/
 		restart() : void;		
+		/** !#en End game, it will close the game window
+		!#zh 退出游戏 
+		*/
+		end() : void;		
 		/** !#en Prepare game.
 		!#zh 准备引擎，请不要直接调用这个函数。 
 		*/
@@ -2957,7 +2999,8 @@ declare module cc {
 		在节点上注册指定类型的回调函数，也可以设置 target 用于绑定响应函数的调用者。<br/>
 		同时您可以将事件派发到父节点或者通过调用 stopPropagation 拦截它。<br/>
 		推荐使用这种方式来监听节点上的触摸或鼠标事件，请不要在节点上直接使用 cc.eventManager。
-		@param type A string representing the event type to listen for.
+		@param type A string representing the event type to listen for.<br>
+		                       See {{#crossLink "Node/position-changed:event"}}Node Events{{/crossLink}} for all builtin events.
 		@param callback The callback that will be invoked when the event is dispatched.
 		                             The callback is ignored if it is a duplicate (the callbacks are unique).
 		@param target The target to invoke the callback, can be null
@@ -2968,11 +3011,12 @@ declare module cc {
 		
 		@example 
 		```js
-		// add Node Touch Event
+		this.node.on(cc.Node.EventType.TOUCH_START, this.memberFunction, this);  // if "this" is component and the "memberFunction" declared in CCClass.
 		node.on(cc.Node.EventType.TOUCH_START, callback, this.node);
 		node.on(cc.Node.EventType.TOUCH_MOVE, callback, this.node);
 		node.on(cc.Node.EventType.TOUCH_END, callback, this.node);
 		node.on(cc.Node.EventType.TOUCH_CANCEL, callback, this.node);
+		node.on("anchor-changed", callback, this);
 		``` 
 		*/
 		on(type : string, callback: (param: Event) => void, target? : any, useCapture : boolean) : Function;		
@@ -2990,9 +3034,9 @@ declare module cc {
 		
 		@example 
 		```js
-		// remove Node TOUCH_START Event.
-		node.on(cc.Node.EventType.TOUCH_START, callback, this.node);
+		this.node.off(cc.Node.EventType.TOUCH_START, this.memberFunction, this);
 		node.off(cc.Node.EventType.TOUCH_START, callback, this.node);
+		node.off("anchor-changed", callback, this);
 		``` 
 		*/
 		off(type : string, callback : Function, target? : any, useCapture : boolean) : void;		
@@ -3430,7 +3474,7 @@ declare module cc {
 		 - radial acceleration (Gravity mode)                                   <br/>
 		 - radius direction (Radius mode) (Particle Designer supports outwards to inwards direction only) <br/>
 		It is possible to customize any of the above mentioned properties in runtime. Example:   <br/> */
-		export class ParticleSystem extends cc._RendererUnderSG {		
+		export class ParticleSystem extends _RendererUnderSG {		
 		/** !#en Play particle in edit mode.
 		!#zh 在编辑器模式下预览粒子，启用后选中粒子时，粒子将自动播放。 */
 		preview : boolean;		
@@ -3624,101 +3668,29 @@ declare module cc {
 		*/
 		setTextureWithRect(texture : Texture2D, rect : Rect) : void;	
 	}		
-		/** !#en cc.TMXObjectGroup represents the TMX object group.
-		!#zh TMXObjectGroup 用来表示 TMX 对象组。 */
-		export class TMXObjectGroup extends cc._Class {		
-		/** Properties from the group. They can be added using tilemap editors. */
-		properties : any[];		
-		/** Name of the group */
-		groupName : string;		
-		/** <p>The cc.TMXObjectGroup's constructor. <br/>
-		This function will automatically be invoked when you create a node using new construction: "var node = new cc.TMXObjectGroup()".<br/>
-		Override it to extend its behavior, remember to call "this._super()" in the extended "ctor" function.</p> 
+		/** !#en Renders the TMX object.
+		!#zh 渲染 tmx object。 */
+		export class TMXObject {		
+		/** !#en Get the name of object
+		!#zh 获取对象的名称 
 		*/
-		ctor() : void;		
-		/** !#en Offset position of child objects.
-		!#zh 获取子对象的偏移位置。
-		
-		@example 
-		```js
-		var offset = tMXObjectGroup.getPositionOffset();
-		``` 
+		getObjectName() : string;		
+		/** !#en Get the property of object
+		!#zh 获取对象的属性 
 		*/
-		getPositionOffset() : Vec2;		
-		/** !#en Offset position of child objects.
-		!#zh 设置子对象的偏移位置。
-		
-		@example 
-		```js
-		tMXObjectGroup.setPositionOffset(cc.v2(5, 5));
-		``` 
+		getProperty() : any;		
+		/** !#en Get the properties of object
+		!#zh 获取对象的属性 
 		*/
-		setPositionOffset(offset : Vec2) : void;		
-		/** !#en List of properties stored in a dictionary.
-		!#zh 以映射的形式获取属性列表。
-		
-		@example 
-		```js
-		var offset = tMXObjectGroup.getProperties();
-		``` 
+		getProperties() : any;		
+		/** !#en Set the object name
+		!#zh 设置对象名称 
 		*/
-		getProperties() : any[];		
-		/** !#en List of properties stored in a dictionary.
-		!#zh 设置属性列表。
-		
-		@example 
-		```js
-		tMXObjectGroup.setProperties(obj);
-		``` 
+		setObjectName(name : string) : void;		
+		/** !#en Set the properties of the object
+		!#zh 设置对象的属性 
 		*/
-		setProperties(Var : any) : void;		
-		/** !#en Gets the Group name.
-		!#zh 获取组名称。
-		
-		@example 
-		```js
-		var groupName = tMXObjectGroup.getGroupName;
-		``` 
-		*/
-		getGroupName() : string;		
-		/** !#en Set the Group name.
-		!#zh 设置组名称。
-		
-		@example 
-		```js
-		tMXObjectGroup.setGroupName("New Group");
-		``` 
-		*/
-		setGroupName(groupName : string) : void;		
-		/** !#en
-		Return the object for the specific object name. <br />
-		It will return the 1st object found on the array for the given name.
-		!#zh 获取指定的对象。
-		
-		@example 
-		```js
-		var object = tMXObjectGroup.getObject("Group");
-		``` 
-		*/
-		getObject(objectName : string) : any;		
-		/** !#en Gets the objects.
-		!#zh 获取对象数组。
-		
-		@example 
-		```js
-		var objects = tMXObjectGroup.getObjects();
-		``` 
-		*/
-		getObjects() : any[];		
-		/** !#en Set the objects.
-		!#zh 设置对象数组。
-		
-		@example 
-		```js
-		tMXObjectGroup.setObjects(objects);
-		``` 
-		*/
-		setObjects(objects : any) : void;	
+		setProperties(props : any) : void;	
 	}		
 		/** !#en Render the TMX layer.
 		!#zh 渲染 TMX layer。 */
@@ -4003,7 +3975,7 @@ declare module cc {
 		export class TiledMap extends Component {		
 		/** !#en The TiledMap Asset.
 		!#zh TiledMap 资源。 */
-		tmxAsset : cc.TiledMapAsset;		
+		tmxAsset : TiledMapAsset;		
 		/** !#en Gets the map size.
 		!#zh 获取地图大小。
 		
@@ -4072,16 +4044,7 @@ declare module cc {
 		}
 		``` 
 		*/
-		getObjectGroups() : any[];		
-		/** !#en object groups.
-		!#zh 设置所有的对象层。
-		
-		@example 
-		```js
-		titledMap.setObjectGroups(groups);
-		``` 
-		*/
-		setObjectGroups(groups : any[]) : void;		
+		getObjectGroups() : TiledObjectGroup[];		
 		/** !#en Gets the map properties.
 		!#zh 获取地图的属性。
 		
@@ -4114,7 +4077,7 @@ declare module cc {
 		}
 		``` 
 		*/
-		allLayers() : Node[];		
+		allLayers() : TiledLayer[];		
 		/** !#en return the cc.TiledLayer for the specific layer.
 		!#zh 获取指定名称的 layer。
 		
@@ -4134,7 +4097,7 @@ declare module cc {
 		cc.log("ObjectGroup: " + group);
 		``` 
 		*/
-		getObjectGroup(groupName : string) : TMXObjectGroup;		
+		getObjectGroup(groupName : string) : TiledObjectGroup;		
 		/** !#en Return the value for the specific property name.
 		!#zh 通过属性名称，获取指定的属性。
 		
@@ -4157,8 +4120,187 @@ declare module cc {
 		getPropertiesForGID(GID : number) : any;	
 	}		
 		/** Class for tiled map asset handling. */
-		export class TiledMapAsset extends Asset {		
-		constructor();	
+		export class TiledMapAsset extends Asset {	
+	}		
+		/** !#en Renders the TMX object group.
+		!#zh 渲染 tmx object group。 */
+		export class TiledObjectGroup extends _SGComponent {		
+		/** !#en Offset position of child objects.
+		!#zh 获取子对象的偏移位置。
+		
+		@example 
+		```js
+		var offset = tMXObjectGroup.getPositionOffset();
+		``` 
+		*/
+		getPositionOffset() : Vec2;		
+		/** !#en Offset position of child objects.
+		!#zh 设置子对象的偏移位置。
+		
+		@example 
+		```js
+		tMXObjectGroup.setPositionOffset(cc.v2(5, 5));
+		``` 
+		*/
+		setPositionOffset(offset : Vec2) : void;		
+		/** !#en List of properties stored in a dictionary.
+		!#zh 以映射的形式获取属性列表。
+		
+		@example 
+		```js
+		var offset = tMXObjectGroup.getProperties();
+		``` 
+		*/
+		getProperties() : any;		
+		/** !#en Set the properties of the object group.
+		!#zh 设置属性列表。
+		
+		@example 
+		```js
+		tMXObjectGroup.setProperties(obj);
+		``` 
+		*/
+		setProperties(Var : any) : void;		
+		/** !#en Gets the Group name.
+		!#zh 获取组名称。
+		
+		@example 
+		```js
+		var groupName = tMXObjectGroup.getGroupName;
+		``` 
+		*/
+		getGroupName() : string;		
+		/** !#en Set the Group name.
+		!#zh 设置组名称。
+		
+		@example 
+		```js
+		tMXObjectGroup.setGroupName("New Group");
+		``` 
+		*/
+		setGroupName(groupName : string) : void;		
+		/** !#en
+		Return the object for the specific object name. <br />
+		It will return the 1st object found on the array for the given name.
+		!#zh 获取指定的对象。
+		
+		@example 
+		```js
+		var object = tMXObjectGroup.getObject("Group");
+		``` 
+		*/
+		getObject(objectName : string) : any;		
+		/** !#en Gets the objects.
+		!#zh 获取对象数组。
+		
+		@example 
+		```js
+		var objects = tMXObjectGroup.getObjects();
+		``` 
+		*/
+		getObjects() : any[];	
+	}		
+		/** !#en
+		The Armature Display of DragonBones <br/>
+		<br/>
+		(Armature Display has a reference to a DragonBonesAsset and stores the state for ArmatureDisplay instance,
+		which consists of the current pose's bone SRT, slot colors, and which slot attachments are visible. <br/>
+		Multiple Armature Display can use the same DragonBonesAsset which includes all animations, skins, and attachments.) <br/>
+		!#zh
+		DragonBones 骨骼动画 <br/>
+		<br/>
+		(Armature Display 具有对骨骼数据的引用并且存储了骨骼实例的状态，
+		它由当前的骨骼动作，slot 颜色，和可见的 slot attachments 组成。<br/>
+		多个 Armature Display 可以使用相同的骨骼数据，其中包括所有的动画，皮肤和 attachments。)<br/> */
+		export class ArmatureDisplay extends _RendererUnderSG {		
+		/** !#en
+		The DragonBones data contains the armatures information (bind pose bones, slots, draw order,
+		attachments, skins, etc) and animations but does not hold any state.<br/>
+		Multiple ArmatureDisplay can share the same DragonBones data.
+		!#zh
+		骨骼数据包含了骨骼信息（绑定骨骼动作，slots，渲染顺序，
+		attachments，皮肤等等）和动画但不持有任何状态。<br/>
+		多个 ArmatureDisplay 可以共用相同的骨骼数据。 */
+		dragonAsset : DragonBonesAsset;		
+		/** !#en
+		The atlas asset for the DragonBones.
+		!#zh
+		骨骼数据所需的 Atlas Texture 数据。 */
+		dragonAtlasAsset : DragonBonesAtlasAsset;		
+		/** !#en The name of current armature.
+		!#zh 当前的 Armature 名称。 */
+		armatureName : string;		
+		/** !#en The name of current playing animation.
+		!#zh 当前播放的动画名称。 */
+		animationName : string;		
+		_defaultArmatureIndex : number;		
+		/** !#en The time scale of this armature.
+		!#zh 当前骨骼中所有动画的时间缩放率。 */
+		timeScale : number;		
+		/** !#en The play times of the default animation.
+		     -1 means using the value of config file;
+		     0 means repeat for ever
+		     >0 means repeat times
+		!#zh 播放默认动画的循环次数
+		     -1 表示使用配置文件中的默认值;
+		     0 表示无限循环
+		     >0 表示循环次数 */
+		playTimes : number;		
+		/** !#en Indicates whether open debug bones.
+		!#zh 是否显示 bone 的 debug 信息。 */
+		debugBones : boolean;		
+		/** !#en
+		Play the specified animation.
+		Parameter animName specify the animation name.
+		Parameter playTimes specify the repeat times of the animation.
+		-1 means use the value of the config file.
+		0 means play the animation for ever.
+		>0 means repeat times.
+		!#zh
+		播放指定的动画.
+		animName 指定播放动画的名称。
+		playTimes 指定播放动画的次数。
+		-1 为使用配置文件中的次数。
+		0 为无限循环播放。
+		>0 为动画的重复次数。 
+		*/
+		playAnimation(animName : string, playTimes : number) : dragonBones.AnimationState;		
+		/** !#en
+		Get the all armature names in the DragonBones Data.
+		!#zh
+		获取 DragonBones 数据中所有的 armature 名称 
+		*/
+		getArmatureNames() : any[];		
+		/** !#en
+		Get the all animation names of specified armature.
+		!#zh
+		获取指定的 armature 的所有动画名称。 
+		*/
+		getAnimationNames(armatureName : string) : any[];		
+		/** !#en
+		Add event listener for the DragonBones Event.
+		!#zh
+		添加 DragonBones 事件监听器。 
+		*/
+		addEventListener(eventType : dragonBones.EventObject, listener : Function, target : any) : void;		
+		/** !#en
+		Remove the event listener for the DragonBones Event.
+		!#zh
+		移除 DragonBones 事件监听器。 
+		*/
+		removeEventListener(eventType : dragonBones.EventObject, listener : Function, target : any) : void;		
+		/** !#en
+		Build the armature for specified name.
+		!#zh
+		构建指定名称的 armature 对象 
+		*/
+		buildArmature(armatureName : string) : dragonBones.Armature;		
+		/** !#en
+		Get the current armature object of the ArmatureDisplay.
+		!#zh
+		获取 ArmatureDisplay 当前使用的 Armature 对象 
+		*/
+		armature() : any;	
 	}		
 		/** !#en
 		 cc.NodePool is the cache pool designed for node type.<br/>
@@ -4287,6 +4429,119 @@ declare module cc {
 		*/
 		drainAllPools() : void;	
 	}		
+		/** !#en
+		Base class for handling assets used in Fireball. This class can be instantiate.
+		
+		You may want to override:<br/>
+		- createNode<br/>
+		- cc.Object._serialize<br/>
+		- cc.Object._deserialize<br/>
+		!#zh
+		资源基类，该类可以被实例化。<br/>
+		
+		您可能需要重写：<br/>
+		- createNode <br/>
+		- cc.Object._serialize<br/>
+		- cc.Object._deserialize<br/> */
+		export class Asset extends RawAsset {		
+		/** !#en
+		Returns the url of this asset's first raw file, if none of rawFile exists,
+		it will returns an empty string.
+		!#zh 返回该资源的原始文件的 URL，如果不支持 RAW 文件，它将返回一个空字符串。 */
+		rawUrl : string;		
+		/** !#en
+		Returns the url of this asset's raw files, if none of rawFile exists,
+		it will returns an empty array.
+		!#zh 返回该资源的原文件的 URL 数组，如果不支持 RAW 文件，它将返回一个空数组。 */
+		rawUrls : String[];		
+		/** !#en Indicates whether its dependent raw assets can support deferred load if the owner scene is marked as `asyncLoadAssets`.
+		!#zh 当场景被标记为 `asyncLoadAssets`，禁止延迟加载该资源所依赖的其它 RawAsset。 */
+		preventDeferredLoadDependents : boolean;		
+		/** !#en
+		Create a new node using this asset in the scene.<br/>
+		If this type of asset dont have its corresponding node type, this method should be null.
+		!#zh
+		使用该资产在场景中创建一个新节点。<br/>
+		如果这类资产没有相应的节点类型，该方法应该是空的。 
+		*/
+		createNode(callback: (error: string, node: any) => void) : void;	
+	}		
+		/** !#en Class for audio data handling.
+		!#zh 音频资源类。 */
+		export class AudioClip extends RawAsset {	
+	}		
+		/** !#en Class for BitmapFont handling.
+		!#zh 位图字体资源类。 */
+		export class BitmapFont extends RawAsset {	
+	}		
+		/** !#en Class for Font handling.
+		!#zh 字体资源类。 */
+		export class Font extends RawAsset {	
+	}		
+		/** !#en Class for prefab handling.
+		!#zh 预制资源类。 */
+		export class Prefab extends Asset {	
+	}		
+		/** !#en
+		The base class for registering asset types.
+		
+		You may want to override:
+		- createNode (static)
+		!#zh
+		注册用的资源基类。<br/>
+		你可能要重写：<br/>
+		- createNode (static) */
+		export class RawAsset extends CCObject {		
+		/** !#en
+		Create a new node in the scene.<br/>
+		If this type of asset dont have its corresponding node type, this method should be null.
+		!#zh
+		在场景中创建一个新节点。<br/>
+		如果这类资源没有相应的节点类型，该方法应该是空的。 
+		*/
+		createNodeByInfo(Info : any, callback: (error: string, node: any) => void) : void;	
+	}		
+		/** !#en Class for scene handling.
+		!#zh 场景资源类。 */
+		export class SceneAsset extends Asset {		
+		scene : Scene;		
+		/** !#en Indicates the raw assets of this scene can be load after scene launched.
+		!#zh 指示该场景依赖的资源可否在场景切换后再延迟加载。 */
+		asyncLoadAssets : boolean;	
+	}		
+		/** !#en Class for script handling.
+		!#zh Script 资源类。 */
+		export class _Script extends Asset {	
+	}		
+		/** !#en Class for JavaScript handling.
+		!#zh JavaScript 资源类。 */
+		export class _JavaScript extends Asset {	
+	}		
+		/** !#en Class for coffee script handling.
+		!#zh CoffeeScript 资源类。 */
+		export class CoffeeScript extends Asset {	
+	}		
+		/** !#en Class for sprite atlas handling.
+		!#zh 精灵图集资源类。 */
+		export class SpriteAtlas extends RawAsset {		
+		/** Returns the texture of the sprite atlas 
+		*/
+		getTexture() : Texture2D;		
+		/** Returns the sprite frame correspond to the given key in sprite atlas. 
+		*/
+		getSpriteFrame(key : string) : SpriteFrame;		
+		/** Returns the sprite frames in sprite atlas. 
+		*/
+		getSpriteFrames() : [SpriteFrame];	
+	}		
+		/** !#en Class for TTFFont handling.
+		!#zh TTF 字体资源类。 */
+		export class TTFFont extends Asset {	
+	}		
+		/** !#en Class for text file.
+		!#zh 文本资源类。 */
+		export class TextAsset extends Asset {	
+	}		
 		/** !#en Box Collider.
 		!#zh 包围盒碰撞组件 */
 		export class BoxCollider extends Component {		
@@ -4412,131 +4667,6 @@ declare module cc {
 		/** !#en Polygon points
 		!#zh 多边形顶点数组 */
 		points : [Vec2];	
-	}		
-		/** !#en
-		Base class for handling assets used in Fireball. This class can be instantiate.
-		
-		You may want to override:<br/>
-		- createNode<br/>
-		- cc.Object._serialize<br/>
-		- cc.Object._deserialize<br/>
-		!#zh
-		资源基类，该类可以被实例化。<br/>
-		
-		您可能需要重写：<br/>
-		- createNode <br/>
-		- cc.Object._serialize<br/>
-		- cc.Object._deserialize<br/> */
-		export class Asset extends RawAsset {		
-		constructor();		
-		/** !#en
-		Returns the url of this asset's first raw file, if none of rawFile exists,
-		it will returns an empty string.
-		!#zh 返回该资源的原始文件的 URL，如果不支持 RAW 文件，它将返回一个空字符串。 */
-		rawUrl : string;		
-		/** !#en
-		Returns the url of this asset's raw files, if none of rawFile exists,
-		it will returns an empty array.
-		!#zh 返回该资源的原文件的 URL 数组，如果不支持 RAW 文件，它将返回一个空数组。 */
-		rawUrls : String[];		
-		/** !#en Indicates whether its dependent raw assets can support deferred load if the owner scene is marked as `asyncLoadAssets`.
-		!#zh 当场景被标记为 `asyncLoadAssets`，禁止延迟加载该资源所依赖的其它 RawAsset。 */
-		preventDeferredLoadDependents : boolean;		
-		/** !#en
-		Create a new node using this asset in the scene.<br/>
-		If this type of asset dont have its corresponding node type, this method should be null.
-		!#zh
-		使用该资产在场景中创建一个新节点。<br/>
-		如果这类资产没有相应的节点类型，该方法应该是空的。 
-		*/
-		createNode(callback: (error: string, node: any) => void) : void;	
-	}		
-		/** !#en Class for audio data handling.
-		!#zh 音频资源类。 */
-		export class AudioClip extends RawAsset {		
-		constructor();	
-	}		
-		/** !#en Class for BitmapFont handling.
-		!#zh 位图字体资源类。 */
-		export class BitmapFont extends RawAsset {		
-		constructor();	
-	}		
-		/** !#en Class for Font handling.
-		!#zh 字体资源类。 */
-		export class Font extends RawAsset {		
-		constructor();	
-	}		
-		/** !#en Class for prefab handling.
-		!#zh 预制资源类。 */
-		export class Prefab extends Asset {		
-		constructor();	
-	}		
-		/** !#en
-		The base class for registering asset types.
-		
-		You may want to override:
-		- createNode (static)
-		!#zh
-		注册用的资源基类。<br/>
-		你可能要重写：<br/>
-		- createNode (static) */
-		export class RawAsset extends CCObject {		
-		/** !#en
-		Create a new node in the scene.<br/>
-		If this type of asset dont have its corresponding node type, this method should be null.
-		!#zh
-		在场景中创建一个新节点。<br/>
-		如果这类资源没有相应的节点类型，该方法应该是空的。 
-		*/
-		createNodeByInfo(Info : any, callback: (error: string, node: any) => void) : void;	
-	}		
-		/** !#en Class for scene handling.
-		!#zh 场景资源类。 */
-		export class SceneAsset extends Asset {		
-		constructor();		
-		scene : cc.Scene;		
-		/** !#en Indicates the raw assets of this scene can be load after scene launched.
-		!#zh 指示该场景依赖的资源可否在场景切换后再延迟加载。 */
-		asyncLoadAssets : boolean;	
-	}		
-		/** !#en Class for script handling.
-		!#zh Script 资源类。 */
-		export class _Script extends Asset {		
-		constructor();	
-	}		
-		/** !#en Class for JavaScript handling.
-		!#zh JavaScript 资源类。 */
-		export class _JavaScript extends Asset {		
-		constructor();	
-	}		
-		/** !#en Class for coffee script handling.
-		!#zh CoffeeScript 资源类。 */
-		export class CoffeeScript extends Asset {		
-		constructor();	
-	}		
-		/** !#en Class for sprite atlas handling.
-		!#zh 精灵图集资源类。 */
-		export class SpriteAtlas extends RawAsset {		
-		constructor();		
-		/** Returns the texture of the sprite atlas 
-		*/
-		getTexture() : cc.Texture2D;		
-		/** Returns the sprite frame correspond to the given key in sprite atlas. 
-		*/
-		getSpriteFrame(key : string) : SpriteFrame;		
-		/** Returns the sprite frames in sprite atlas. 
-		*/
-		getSpriteFrames() : [SpriteFrame];	
-	}		
-		/** !#en Class for TTFFont handling.
-		!#zh TTF 字体资源类。 */
-		export class TTFFont extends Asset {		
-		constructor();	
-	}		
-		/** !#en Class for text file.
-		!#zh 文本资源类。 */
-		export class TextAsset extends Asset {		
-		constructor();	
 	}		
 		/** !#en The animation component is used to play back animations.
 		
@@ -4740,14 +4870,27 @@ declare module cc {
 		/** !#en Rewind playing music.
 		!#zh 从头开始播放。 
 		*/
-		rewind() : void;	
+		rewind() : void;		
+		/** !#en Get current time
+		!#zh 获取当前的播放时间 
+		*/
+		getCurrentTime() : void;		
+		/** !#en Set current time
+		!#zh 设置当前的播放时间 
+		*/
+		setCurrentTime(time : number) : void;		
+		/** !#en Get audio duration
+		!#zh 获取当前音频的长度 
+		*/
+		getDuration() : void;	
 	}		
 		/** !#en
-		Button has 3 Transition types
+		Button has 4 Transition types
 		When Button state changed:
 		 If Transition type is Button.Transition.NONE, Button will do nothing
 		 If Transition type is Button.Transition.COLOR, Button will change target's color
 		 If Transition type is Button.Transition.SPRITE, Button will change target Sprite's sprite
+		 If Transition type is Button.Transition.SCALE, Button will change target node's scale
 		
 		Button will trigger 5 events:
 		 Button.EVENT_TOUCH_DOWN
@@ -4763,6 +4906,7 @@ declare module cc {
 		  -Button.Transition.NONE   // 不做任何过渡</br>
 		  -Button.Transition.COLOR  // 进行颜色之间过渡</br>
 		  -Button.Transition.SPRITE // 进行精灵之间过渡</br>
+		  -Button.Transition.SCALE // 进行缩放过渡</br>
 		
 		按钮可以绑定事件（但是必须要在按钮的 Node 上才能绑定事件）：</br>
 		  // 以下事件可以在全平台上都触发</br>
@@ -4784,6 +4928,9 @@ declare module cc {
 		!#zh
 		按钮事件是否被响应，如果为 false，则按钮将被禁用。 */
 		interactable : boolean;		
+		/** !#en When this flag is true, Button target sprite will turn gray when interactable is false.
+		!#zh 如果这个标记为 true，当 button 的 interactable 属性为 false 的时候，会使用内置 shader 让 button 的 target 节点的 sprite 组件变灰 */
+		enableAutoGrayEffect : boolean;		
 		/** !#en Transition type
 		!#zh 按钮状态改变时过渡方式。 */
 		transition : Button.Transition;		
@@ -4799,9 +4946,13 @@ declare module cc {
 		/** !#en Disabled state color
 		!#zh 禁用状态下按钮所显示的颜色。 */
 		disabledColor : Color;		
-		/** !#en Color transition duration
-		!#zh 颜色过渡时所需时间 */
+		/** !#en Color and Scale transition duration
+		!#zh 颜色过渡和缩放过渡时所需时间 */
 		duration : number;		
+		/** !#en  When user press the button, the button will zoom to a scale.
+		The final scale of the button  equals (button original scale * zoomScale)
+		!#zh 当用户点击按钮后，按钮会缩放到一个值，这个值等于 Button 原始 scale * zoomScale */
+		zoomScale : number;		
 		/** !#en Normal state sprite
 		!#zh 普通状态下按钮所显示的 Sprite 。 */
 		normalSprite : SpriteFrame;		
@@ -4822,10 +4973,10 @@ declare module cc {
 		 If Transition type is Button.Transition.SPRITE, Button will change target Sprite's sprite
 		!#zh
 		需要过渡的目标。
-		当前按钮状态改变有：
+		当前按钮状态改变规则：
 		-如果 Transition type 选择 Button.Transition.NONE，按钮不做任何过渡。
 		-如果 Transition type 选择 Button.Transition.COLOR，按钮会对目标颜色进行颜色之间的过渡。
-		-如果 Transition type 选择 Button.Transition.NONE，按钮会对目标 Sprite 进行 Sprite 之间的过渡。 */
+		-如果 Transition type 选择 Button.Transition.Sprite，按钮会对目标 Sprite 进行 Sprite 之间的过渡。 */
 		target : Node;		
 		/** !#en If Button is clicked, it will trigger event's handler
 		!#zh 按钮的点击事件列表。 */
@@ -4839,7 +4990,7 @@ declare module cc {
 		instance : Canvas;		
 		/** !#en The desigin resolution for current scene.
 		!#zh 当前场景设计分辨率。 */
-		designResolution : cc.Size;		
+		designResolution : Size;		
 		/** !#en TODO
 		!#zh: 是否优先将设计分辨率高度撑满视图高度。 */
 		fitHeight : boolean;		
@@ -4857,7 +5008,6 @@ declare module cc {
 		<br/>
 		注意：不允许使用组件的子类构造参数，因为组件是由引擎创建的。 */
 		export class Component extends Object {		
-		constructor();		
 		/** !#en The node this component is attached to. A component is always attached to a node.
 		!#zh 该组件被附加到的节点。组件总会附加到一个节点。 */
 		node : Node;		
@@ -4903,6 +5053,10 @@ declare module cc {
 		onDestroy() : void;		
 		onFocusInEditor() : void;		
 		onLostFocusInEditor() : void;		
+		/** !#en Called to initialize the component or node’s properties when adding the component the first time or when the Reset command is used. This function is only called in editor.
+		!#zh 用来初始化组件或节点的一些属性，当该组件被第一次添加到节点上或用户点击了它的 Reset 菜单时调用。这个回调只会在编辑器下调用。 
+		*/
+		resetInEditor() : void;		
 		/** !#en Adds a component class to the node. You can also add component to node by passing in the name of the script.
 		!#zh 向节点添加一个组件类，你还可以通过传入脚本的名称来添加组件。
 		@param typeOrTypename the constructor or the class name of the component to add
@@ -5109,8 +5263,19 @@ declare module cc {
 		!#zh 输入框最大允许输入的字符个数。 */
 		placeholderFontColor : Color;		
 		/** !#en The maximize input length of EditBox.
-		!#zh 输入框最大允许输入的字符个数。 */
+		- If pass a value less than 0, it won't limit the input number of characters.
+		- If pass 0, it doesn't allow input any characters.
+		!#zh 输入框最大允许输入的字符个数。
+		- 如果值为小于 0 的值，则不会限制输入字符个数。
+		- 如果值为 0，则不允许用户进行任何输入。 */
 		maxLength : number;		
+		/** !#en The input is always visible and be on top of the game view.
+		!zh 输入框总是可见，并且永远在游戏视图的上面
+		Note: only available on Web at the moment. */
+		stayOnTop : boolean;		
+		/** !#en Set the tabIndex of the DOM input element, only useful on Web.
+		!#zh 修改 DOM 输入元素的 tabIndex，这个属性只有在 Web 上面修改有意义。 */
+		tabIndex : number;		
 		/** !#en The event handler to be called when EditBox began to edit text.
 		!#zh 开始编辑文本输入框触发的事件回调。 */
 		editingDidBegin : Component.EventHandler;		
@@ -5122,7 +5287,17 @@ declare module cc {
 		editingDidEnded : Component.EventHandler;		
 		/** !#en The event handler to be called when return key is pressed. Windows is not supported.
 		!#zh 当用户按下回车按键时的事件回调，目前不支持 windows 平台 */
-		editingReturn : Component.EventHandler;	
+		editingReturn : Component.EventHandler;		
+		/** !#en Let the EditBox get focus, only valid when stayOnTop is true.
+		!#zh 让当前 EditBox 获得焦点，只有在 stayOnTop 为 true 的时候设置有效
+		Note: only available on Web at the moment. 
+		*/
+		setFocus() : void;		
+		/** !#en Determine whether EditBox is getting focus or not.
+		!#zh 判断 EditBox 是否获得了焦点
+		Note: only available on Web at the moment. 
+		*/
+		isFocused() : void;	
 	}		
 		/** !#en The Label Component.
 		!#zh 文字标签组件 */
@@ -5153,7 +5328,7 @@ declare module cc {
 		enableWrapText : boolean;		
 		/** !#en The font of label.
 		!#zh 文本字体。 */
-		font : cc.Font;		
+		font : Font;		
 		/** !#en Whether use system font name or not.
 		!#zh 是否使用系统字体。 */
 		isSystemFontUsed : boolean;	
@@ -5210,6 +5385,85 @@ declare module cc {
 		/** undefined */
 		export class Mask extends _RendererInSG {	
 	}		
+		/** !#en The PageView control
+		!#zh 页面视图组件 */
+		export class PageView extends ScrollView {		
+		/** !#en The page view direction
+		!#zh 页面视图滚动类型 */
+		direction : PageView.Direction;		
+		/** !#en
+		The scroll threshold value, when drag exceeds this value,
+		release the next page will automatically scroll, less than the restore
+		!#zh 滚动临界值，默认单位百分比，当拖拽超出该数值时，松开会自动滚动下一页，小于时则还原。 */
+		scrollThreshold : number;		
+		/** !#en Change the PageTurning event timing of PageView.
+		!#zh 设置 PageView PageTurning 事件的发送时机。 */
+		pageTurningEventTiming : number;		
+		/** !#en The Page View Indicator
+		!#zh 页面视图指示器组件 */
+		indicator : PageViewIndicator;		
+		/** !#en PageView events callback
+		!#zh 滚动视图的事件回调函数 */
+		pageEvents : Component.EventHandler[];		
+		/** !#en Returns current page index
+		!#zh 返回当前页面索引 
+		*/
+		getCurrentPageIndex() : number;		
+		/** !#en Set current page index
+		!#zh 设置当前页面索引 
+		*/
+		setCurrentPageIndex(index : number) : void;		
+		/** !#en Returns all pages of pageview
+		!#zh 返回视图中的所有页面 
+		*/
+		getPages() : Node[];		
+		/** !#en At the end of the current page view to insert a new view
+		!#zh 在当前页面视图的尾部插入一个新视图 
+		*/
+		addPage(page : Node) : void;		
+		/** !#en Inserts a page in the specified location
+		!#zh 将页面插入指定位置中 
+		*/
+		insertPage(page : Node, index : number) : void;		
+		/** !#en Removes a page from PageView.
+		!#zh 移除指定页面 
+		*/
+		removePage(page : Node) : void;		
+		/** !#en Removes a page at index of PageView.
+		!#zh 移除指定下标的页面 
+		*/
+		removePageAtIndex(index : number) : void;		
+		/** !#en Removes all pages from PageView
+		!#zh 移除所有页面 
+		*/
+		removeAllPages() : void;		
+		/** !#en Scroll PageView to index.
+		!#zh 滚动到指定页面
+		@param idx index of page.
+		@param timeInSecond scrolling time 
+		*/
+		scrollToPage(idx : number, timeInSecond : number) : void;	
+	}		
+		/** !#en The Page View Indicator Component
+		!#zh 页面视图每页标记组件 */
+		export class PageViewIndicator extends Component {		
+		/** !#en The spriteFrame for each element.
+		!#zh 每个页面标记显示的图片 */
+		spriteFrame : SpriteFrame;		
+		/** !#en The location direction of PageViewIndicator.
+		!#zh 页面标记摆放方向 */
+		direction : PageViewIndicator.Direction;		
+		/** !#en The cellSize for each element.
+		!#zh 每个页面标记的大小 */
+		cellSize : Size;		
+		/** !#en The distance between each element.
+		!#zh 每个页面标记之间的边距 */
+		spacing : number;		
+		/** !#en Set Page View
+		!#zh 设置页面视图 
+		*/
+		setPageView(target : PageView) : void;	
+	}		
 		/** !#en
 		Visual indicator of progress in some operation.
 		Displays a bar to the user representing how far the operation has progressed.
@@ -5239,6 +5493,28 @@ declare module cc {
 		/** The base rendering component which will attach a leaf node to the cocos2d scene graph. */
 		export class _RendererUnderSG extends _SGComponent {	
 	}		
+		/** !#en The RichText Component.
+		!#zh 富文本组件 */
+		export class RichText extends Component {		
+		/** !#en Content string of RichText.
+		!#zh 富文本显示的文本内容。 */
+		string : string;		
+		/** !#en Horizontal Alignment of each line in RichText.
+		!#zh 文本内容的水平对齐方式。 */
+		horizontalAlign : TextAlignment;		
+		/** !#en Font size of RichText.
+		!#zh 富文本字体大小。 */
+		fontSize : number;		
+		/** !#en The maximize width of the RichText
+		!#zh 富文本的最大宽度 */
+		maxWidth : number;		
+		/** !#en Line Height of RichText.
+		!#zh 富文本行高。 */
+		lineHeight : number;		
+		/** !#en The image atlas for the img tag. For each src value in the img tag, there should be a valid spriteFrame in the image atlas.
+		!#zh 对于 img 标签里面的 src 属性名称，都需要在 imageAtlas 里面找到一个有效的 spriteFrame，否则 img tag 会判定为无效。 */
+		imageAtlas : SpriteAtlas;	
+	}		
 		/** The base class for all rendering component in scene graph.
 		
 		You should override:
@@ -5252,7 +5528,7 @@ declare module cc {
 		export class Scrollbar extends Component {		
 		/** !#en The "handle" part of the scrollbar.
 		!#zh 作为当前滚动区域位置显示的滑块 Sprite。 */
-		handle : cc.Sprite;		
+		handle : Sprite;		
 		/** !#en The direction of scrollbar.
 		!#zh ScrollBar 的滚动方向。 */
 		direction : Scrollbar.Direction;		
@@ -5307,9 +5583,9 @@ declare module cc {
 		/** !#en Scrollview events callback
 		!#zh 滚动视图的事件回调函数 */
 		scrollEvents : Component.EventHandler[];		
-		/** !#en If cancelInnerEvents is set to true, the scroll behavior will cancel touch events on inner content nodes of the scroll view
+		/** !#en If cancelInnerEvents is set to true, the scroll behavior will cancel touch events on inner content nodes
 		It's set to true by default.
-		!#zh 如果这个属性被设置为 true，那么滚动行为会取消 ScrollView 的子节点上注册的触摸事件，默认被设置为 true。
+		!#zh 如果这个属性被设置为 true，那么滚动行为会取消子节点上注册的触摸事件，默认被设置为 true。
 		注意，子节点上的 touchstart 事件仍然会触发，触点移动距离非常短的情况下 touchmove 和 touchend 也不会受影响。 */
 		cancelInnerEvents : boolean;		
 		/** !#en Scroll the content to the bottom boundary of ScrollView.
@@ -5495,6 +5771,22 @@ declare module cc {
 		*/
 		getContentPosition() : Position;	
 	}		
+		/** !#en The Slider Control
+		!#zh 滑动器组件 */
+		export class Slider extends Component {		
+		/** !#en The "handle" part of the slider
+		!#zh 滑动器滑块按钮部件 */
+		handle : Button;		
+		/** !#en The slider direction
+		!#zh 滑动器方向 */
+		direction : Slider.Direction;		
+		/** !#en The current progress of the slider. The valid value is between 0-1
+		!#zh 当前进度值，该数值的区间是 0-1 之间 */
+		progress : number;		
+		/** !#en The slider events callback
+		!#zh 滑动器组件事件回调函数 */
+		slideEvents : Component.EventHandler[];	
+	}		
 		/** !#en Renders a sprite in the scene.
 		!#zh 该组件用于在场景中渲染精灵。 */
 		export class Sprite extends _RendererUnderSG {		
@@ -5627,6 +5919,45 @@ declare module cc {
 		!#zh 在渲染时改变UV的寻址系数 */
 		tiling : Vec2;	
 	}		
+		/** !#en The toggle component is a CheckBox, when it used together with a ToggleGroup, it
+		could be treated as a RadioButton.
+		!#zh Toggle 是一个 CheckBox，当它和 ToggleGroup 一起使用的时候，可以变成 RadioButton。 */
+		export class Toggle extends Button {		
+		/** !#en When this value is true, the check mark component will be enabled, otherwise
+		the check mark component will be disabled.
+		!#zh 如果这个设置为 true，则 check mark 组件会处于 enabled 状态，否则处于 disabled 状态。 */
+		isChecked : boolean;		
+		/** !#en The toggle group which the toggle belongs to, when it is null, the toggle is a CheckBox.
+		Otherwise, the toggle is a RadioButton.
+		!#zh Toggle 所属的 ToggleGroup，这个属性是可选的。如果这个属性为 null，则 Toggle 是一个 CheckBox，
+		否则，Toggle 是一个 RadioButton。 */
+		toggleGroup : ToggleGroup;		
+		/** !#en The image used for the checkmark.
+		!#zh Toggle 处于选中状态时显示的图片 */
+		checkMark : Sprite;		
+		/** !#en If Toggle is clicked, it will trigger event's handler
+		!#zh Toggle 按钮的点击事件列表。 */
+		checkEvents : Component.EventHandler[];		
+		/** !#en Make the toggle button checked.
+		!#zh 使 toggle 按钮处于选中状态 
+		*/
+		check() : void;		
+		/** !#en Make the toggle button unchecked.
+		!#zh 使 toggle 按钮处于未选中状态 
+		*/
+		uncheck() : void;	
+	}		
+		/** !#en ToggleGroup is not a visiable UI component but a way to modify the behavior of a set of Toggles.
+		Toggles that belong to the same group could only have one of them to be switched on at a time.
+		!#zh ToggleGroup 不是一个可见的 UI 组件，它可以用来修改一组 Toggle  组件的行为。当一组 Toggle 属于同一个 ToggleGroup 的时候，
+		任何时候只能有一个 Toggle 处于选中状态。 */
+		export class ToggleGroup extends Component {		
+		/** !#en If this setting is true, a toggle could be switched off and on when pressed.
+		If it is false, it will make sure there is always only one toggle could be switched on
+		and the already switched on toggle can't be switched off.
+		!#zh 如果这个设置为 true， 那么 toggle 按钮在被点击的时候可以反复地被选中和未选中。 */
+		allowSwitchOff : boolean;	
+	}		
 		/** !#en cc.VideoPlayer is a component for playing videos, you can use it for showing videos in your game.
 		!#zh Video 组件，用于在游戏中播放视频 */
 		export class VideoPlayer extends _RendererUnderSG {		
@@ -5650,7 +5981,7 @@ declare module cc {
 		isFullscreen : boolean;		
 		/** !#en the video player's callback, it will be triggered when certain event occurs, like: playing, paused, stopped and completed.
 		!#zh 视频播放回调函数，该回调函数会在特定情况被触发，比如播放中，暂时，停止和完成播放。 */
-		videoPlayerEvent : cc.Component.EventHandler[];		
+		videoPlayerEvent : Component.EventHandler[];		
 		/** !#en If a video is paused, call this method could resume playing. If a video is stopped, call this method to play from scratch.
 		!#zh 如果视频被暂停播放了，调用这个接口可以继续播放。如果视频被停止播放了，调用这个接口可以从头开始播放。 
 		*/
@@ -5676,7 +6007,7 @@ declare module cc {
 		url : string;		
 		/** !#en The webview's event callback , it will be triggered when certain webview event occurs.
 		!#zh WebView 的回调事件，当网页加载过程中，加载完成后或者加载出错时都会回调此函数 */
-		webviewLoadedEvents : cc.Component.EventHandler[];	
+		webviewLoadedEvents : Component.EventHandler[];	
 	}		
 		/** !#en
 		Stores and manipulate the anchoring based on its parent.
@@ -5903,7 +6234,6 @@ declare module cc {
 		/** !#en Base class of all kinds of events.
 		!#zh 包含事件相关信息的对象。 */
 		export class Event {		
-		constructor();		
 		/** 
 		@param type The name of the event (case-sensitive), e.g. "click", "fire", or "submit"
 		@param bubbles A boolean indicating whether the event bubbles up through the tree or not 
@@ -6160,6 +6490,10 @@ declare module cc {
 		!#zh 检测事件管理器是否启用。 
 		*/
 		isEnabled() : boolean;	
+	}		
+		/** !#en The System event, it currently supports the key events and accelerometer events
+		!#zh 系统事件，它目前支持按键事件和重力感应事件 */
+		export class SystemEvent extends EventTarget {	
 	}		
 		/** !#en The touch event class
 		!#zh 封装了触摸相关的信息。 */
@@ -6474,12 +6808,9 @@ declare module cc {
 		After loaded, you can acquire them by passing the url to this API. 
 		*/
 		getRes(url : string) : any;		
-		/** Returns an item in pipeline. 
+		/** Release the cache of resource by id which is usually the url. 
 		*/
-		getItem() : any;		
-		/** Release the cache of resource by url. 
-		*/
-		release(url : string) : void;		
+		release(id : string) : void;		
 		/** Release the loaded cache of asset. 
 		*/
 		releaseAsset(asset : Asset) : void;		
@@ -6505,7 +6836,7 @@ declare module cc {
 		使用这个 API 可以在单个资源上改变这个默认行为，强制在切换场景时保留或者释放指定资源。<br>
 		<br>
 		参考：{{#crossLink "loader/setAutoReleaseRecursively:method"}}cc.loader.setAutoReleaseRecursively{{/crossLink}}，{{#crossLink "loader/isAutoRelease:method"}}cc.loader.isAutoRelease{{/crossLink}}
-		@param assetOrUrl asset object or the raw asset's url
+		@param assetOrUrlOrUuid asset object or the raw asset's url or uuid
 		@param autoRelease indicates whether should release automatically
 		
 		@example 
@@ -6518,7 +6849,7 @@ declare module cc {
 		cc.loader.setAutoRelease(audioUrl, false);
 		``` 
 		*/
-		setAutoRelease(assetOrUrl : Asset|string, autoRelease : boolean) : void;		
+		setAutoRelease(assetOrUrlOrUuid : Asset|string, autoRelease : boolean) : void;		
 		/** !#en
 		Indicates whether to release the asset and its referenced other assets when loading a new scene.<br>
 		By default, when loading a new scene, all assets in the previous scene will be released or preserved
@@ -6535,7 +6866,7 @@ declare module cc {
 		使用这个 API 可以在指定资源及资源递归引用到的所有资源上改变这个默认行为，强制在切换场景时保留或者释放指定资源。<br>
 		<br>
 		参考：{{#crossLink "loader/setAutoRelease:method"}}cc.loader.setAutoRelease{{/crossLink}}，{{#crossLink "loader/isAutoRelease:method"}}cc.loader.isAutoRelease{{/crossLink}}
-		@param assetOrUrl asset object or the raw asset's url
+		@param assetOrUrlOrUuid asset object or the raw asset's url or uuid
 		@param autoRelease indicates whether should release automatically
 		
 		@example 
@@ -6548,7 +6879,7 @@ declare module cc {
 		cc.loader.setAutoReleaseRecursively(prefab, false);
 		``` 
 		*/
-		setAutoReleaseRecursively(assetOrUrl : Asset|string, autoRelease : boolean) : void;		
+		setAutoReleaseRecursively(assetOrUrlOrUuid : Asset|string, autoRelease : boolean) : void;		
 		/** !#en
 		Returns whether the asset is configured as auto released, despite how "Auto Release Assets" property is set on scene asset.<br>
 		<br>
@@ -6563,7 +6894,8 @@ declare module cc {
 		isAutoRelease(assetOrUrl : Asset|string) : boolean;	
 	}		
 		/** !#en
-		LoadingItems is the manager of items in pipeline.</br>
+		LoadingItems is the queue of items which can flow them into the loading pipeline.</br>
+		Please don't construct it directly, use {{#crossLink "LoadingItems.create"}}LoadingItems.create{{/crossLink}} instead, because we use an internal pool to recycle the queues.</br>
 		It hold a map of items, each entry in the map is a url to object key value pair.</br>
 		Each item always contains the following property:</br>
 		- id: The identification of the item, usually it's identical to url</br>
@@ -6574,21 +6906,58 @@ declare module cc {
 		- complete: The flag indicate whether the item is completed by the pipeline.</br>
 		- states: An object stores the states of each pipe the item go through, the state can be: Pipeline.ItemState.WORKING | Pipeline.ItemState.ERROR | Pipeline.ItemState.COMPLETE</br>
 		</br>
-		Item can hold other custom properties.
+		Item can hold other custom properties.</br>
+		Each LoadingItems object will be destroyed for recycle after onComplete callback</br>
+		So please don't hold its reference for later usage, you can copy properties in it though.
 		!#zh
-		LoadingItems 负责管理 pipeline 中的对象</br>
+		LoadingItems 是一个加载对象队列，可以用来输送加载对象到加载管线中。</br>
+		请不要直接使用 new 构造这个类的对象，你可以使用 {{#crossLink "LoadingItems.create"}}LoadingItems.create{{/crossLink}} 来创建一个新的加载队列，这样可以允许我们的内部对象池回收并重利用加载队列。
 		它有一个 map 属性用来存放加载项，在 map 对象中已 url 为 key 值。</br>
 		每个对象都会包含下列属性：</br>
 		- id：该对象的标识，通常与 url 相同。</br>
 		- url：路径 </br>
 		- type: 类型，它这是默认的 URL 的扩展名，可以手动指定赋值。</br>
 		- error：pipeline 中发生的错误将被保存在这个属性中。</br>
-		- content: pipeline 中处理的内容时，最终的结果也将被存储在这个属性中。</br>
+		- content: pipeline 中处理的临时结果，最终的结果也将被存储在这个属性中。</br>
 		- complete：该标志表明该对象是否通过 pipeline 完成。</br>
 		- states：该对象存储每个管道中对象经历的状态，状态可以是 Pipeline.ItemState.WORKING | Pipeline.ItemState.ERROR | Pipeline.ItemState.COMPLETE</br>
 		</br>
-		对象可容纳其他自定义属性。 */
+		对象可容纳其他自定义属性。</br>
+		每个 LoadingItems 对象都会在 onComplete 回调之后被销毁，所以请不要持有它的引用并在结束回调之后依赖它的内容执行任何逻辑，有这种需求的话你可以提前复制它的内容。 */
 		export class LoadingItems extends CallbacksInvoker {		
+		/** !#en This is a callback which will be invoked while an item flow out the pipeline.
+		You can pass the callback function in LoadingItems.create or set it later.
+		!#zh 这个回调函数将在 item 加载结束后被调用。你可以在构造时传递这个回调函数或者是在构造之后直接设置。
+		@param completedCount The number of the items that are already completed.
+		@param totalCount The total number of the items.
+		@param item The latest item which flow out the pipeline.
+		
+		@example 
+		```js
+		loadingItems.onProgress = function (completedCount, totalCount, item) {
+		     var progress = (100 * completedCount / totalCount).toFixed(2);
+		     cc.log(progress + '%');
+		 }
+		``` 
+		*/
+		onProgress(completedCount : number, totalCount : number, item : any) : void;		
+		/** !#en This is a callback which will be invoked while all items is completed,
+		You can pass the callback function in LoadingItems.create or set it later.
+		!#zh 该函数将在加载队列全部完成时被调用。你可以在构造时传递这个回调函数或者是在构造之后直接设置。
+		@param errors All errored urls will be stored in this array, if no error happened, then it will be null
+		@param items All items.
+		
+		@example 
+		```js
+		loadingItems.onComplete = function (errors, items) {
+		     if (error)
+		         cc.log('Completed with ' + errors.length + ' errors');
+		     else
+		         cc.log('Completed ' + items.totalCount + ' items');
+		 }
+		``` 
+		*/
+		onComplete(errors : any[], items : LoadingItems) : void;		
 		/** !#en The map of all items.
 		!#zh 存储所有加载项的对象。 */
 		map : any;		
@@ -6601,6 +6970,56 @@ declare module cc {
 		/** !#en Total count of completed items.
 		!#zh 所有完成加载项的总数。 */
 		completedCount : number;		
+		/** !#en Activated or not.
+		!#zh 是否启用。 */
+		active : boolean;		
+		/** !#en The constructor function of LoadingItems, this will use recycled LoadingItems in the internal pool if possible.
+		You can pass onProgress and onComplete callbacks to visualize the loading process.
+		!#zh LoadingItems 的构造函数，这种构造方式会重用内部对象缓冲池中的 LoadingItems 队列，以尽量避免对象创建。
+		你可以传递 onProgress 和 onComplete 回调函数来获知加载进度信息。
+		@param pipeline The pipeline to process the queue.
+		@param urlList The items array.
+		@param onProgress The progression callback, refer to {{#crossLink "LoadingItems.onProgress"}}{{/crossLink}}
+		@param onComplete The completion callback, refer to {{#crossLink "LoadingItems.onComplete"}}{{/crossLink}}
+		
+		@example 
+		```js
+		LoadingItems.create(cc.loader, ['a.png', 'b.plist'], function (completedCount, totalCount, item) {
+		     var progress = (100 * completedCount / totalCount).toFixed(2);
+		     cc.log(progress + '%');
+		 }, function (errors, items) {
+		     if (errors) {
+		         for (var i = 0; i < errors.length; ++i) {
+		             cc.log('Error url: ' + errors[i] + ', error: ' + items.getError(errors[i]));
+		         }
+		     }
+		     else {
+		         var result_a = items.getContent('a.png');
+		         // ...
+		     }
+		 })
+		``` 
+		*/
+		create(pipeline : Pipeline, urlList : any[], onProgress : Function, onComplete : Function) : LoadingItems;		
+		/** !#en Retrieve the LoadingItems queue object for an item.
+		!#zh 通过 item 对象获取它的 LoadingItems 队列。
+		@param item The item to query 
+		*/
+		getQueue(item : any) : LoadingItems;		
+		/** !#en Complete an item in the LoadingItems queue, please do not call this method unless you know what's happening.
+		!#zh 通知 LoadingItems 队列一个 item 对象已完成，请不要调用这个函数，除非你知道自己在做什么。
+		@param item The item which has completed 
+		*/
+		itemComplete(item : any) : void;		
+		/** !#en Add urls to the LoadingItems queue.
+		!#zh 向一个 LoadingItems 队列添加加载项。
+		@param urlList The url list to be appended, the url can be object or string 
+		*/
+		append(urlList : any[]) : any[];		
+		/** !#en Complete a LoadingItems queue, please do not call this method unless you know what's happening.
+		!#zh 完成一个 LoadingItems 队列，请不要调用这个函数，除非你知道自己在做什么。 
+		*/
+		allComplete() : void;		
 		/** !#en Check whether all items are completed.
 		!#zh 检查是否所有加载项都已经完成。 
 		*/
@@ -6653,7 +7072,16 @@ declare module cc {
 		!#zh 删除指定目标的所有完成事件监听器。
 		@param key The event key to be removed or the target to be removed 
 		*/
-		removeAllListeners(key : string|any) : void;	
+		removeAllListeners(key : string|any) : void;		
+		/** !#en Complete an item in the LoadingItems queue, please do not call this method unless you know what's happening.
+		!#zh 通知 LoadingItems 队列一个 item 对象已完成，请不要调用这个函数，除非你知道自己在做什么。
+		@param item The item id 
+		*/
+		itemComplete(item : string) : void;		
+		/** !#en Destroy the LoadingItems queue, the queue object won't be garbage collected, it will be recycled, so every after destroy is not reliable.
+		!#zh 销毁一个 LoadingItems 队列，这个队列对象会被内部缓冲池回收，所以销毁后的所有内部信息都是不可依赖的。 
+		*/
+		destroy() : void;	
 	}		
 		/** !#en
 		A pipeline describes a sequence of manipulations, each manipulation is called a pipe.</br>
@@ -6740,7 +7168,7 @@ declare module cc {
 		 ]);
 		``` 
 		*/
-		flowIn(urlList : any[]) : any[];		
+		flowIn(items : any[]) : void;		
 		/** !#en
 		Let new items flow into the pipeline and give a callback when the list of items are all completed. </br>
 		This is for loading dependencies for an existing item in flow, usually used in a pipe logic. </br>
@@ -6781,49 +7209,19 @@ declare module cc {
 		*/
 		getItems() : LoadingItems;		
 		/** !#en Returns an item in pipeline.
-		!#zh 获取指定 item。 
+		!#zh 根据 id 获取一个 item
+		@param id The id of the item 
 		*/
-		getItem() : LoadingItems;		
+		getItem(id : any) : any;		
 		/** !#en Removes an item in pipeline, no matter it's in progress or completed.
-		!#zh 移除指定 item，无论是进行时还是已完成。 
+		!#zh 移除指定 item，无论是进行时还是已完成。
+		@param id The id of the item 
 		*/
-		removeItem() : boolean;		
+		removeItem(id : any) : boolean;		
 		/** !#en Clear the current pipeline, this function will clean up the items.
 		!#zh 清空当前 pipeline，该函数将清理 items。 
 		*/
-		clear() : void;		
-		/** !#en This is a callback which will be invoked while an item flow out the pipeline, you should overwrite this function.
-		!#zh 这个回调函数将在 item 流出 pipeline 时被调用，你应该重写该函数。
-		@param completedCount The number of the items that are already completed.
-		@param totalCount The total number of the items.
-		@param item The latest item which flow out the pipeline.
-		
-		@example 
-		```js
-		pipeline.onProgress = function (completedCount, totalCount, item) {
-		     var progress = (100 * completedCount / totalCount).toFixed(2);
-		     cc.log(progress + '%');
-		 }
-		``` 
-		*/
-		onProgress(completedCount : number, totalCount : number, item : any) : void;		
-		/** !#en This is a callback which will be invoked while all items flow out the pipeline,
-		you should overwirte this function.
-		!#zh 该函数将在所有 item 流出 pipeline 时被调用，你应该重写该函数。
-		@param error All errored urls will be stored in this array, if no error happened, then it will be null
-		@param items All items.
-		
-		@example 
-		```js
-		pipeline.onComplete = function (error, items) {
-		     if (error)
-		         cc.log('Completed with ' + error.length + ' errors');
-		     else
-		         cc.log('Completed ' + items.totalCount + ' items');
-		 }
-		``` 
-		*/
-		onComplete(error : any[], items : LoadingItems) : void;	
+		clear() : void;	
 	}		
 		/** <p>
 		 This class manages all events of input. include: touch, mouse, accelerometer, keyboard                                       <br/>
@@ -6872,7 +7270,8 @@ declare module cc {
 		*/
 		update(dt : number) : void;	
 	}	
-	/** Key map for keyboard event */
+	/** !#en Key map for keyboard event
+	!#zh 键盘事件的按键值 */
 	export enum KEY {		
 		none = 0,
 		back = 0,
@@ -7089,6 +7488,7 @@ declare module cc {
 		LABELATLAS_DEBUG_DRAW = 0,
 		ENABLE_STACKABLE_ACTIONS = 0,
 		ENABLE_GL_STATE_CACHE = 0,
+		TOUCH_TIMEOUT = 0,
 		BLEND_SRC = 0,
 		lerp = 0,
 		rand = 0,
@@ -7102,7 +7502,6 @@ declare module cc {
 	}		
 		/** The base class of most of all the objects in Fireball. */
 		export class Object {		
-		constructor();		
 		/** !#en The name of the object.
 		!#zh 该对象的名称。 */
 		name : string;		
@@ -7288,7 +7687,10 @@ declare module cc {
 		dump() : void;		
 		/** Open a url in browser 
 		*/
-		openURL(url : string) : void;	
+		openURL(url : string) : void;		
+		/** Get the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC. 
+		*/
+		now() : number;	
 	}		
 		/** cc.view is the singleton object which represents the game window.<br/>
 		It's main task include: <br/>
@@ -7610,7 +8012,6 @@ declare module cc {
 		/** The CallbacksHandler is an abstract class that can register and unregister callbacks by key.
 		Subclasses should implement their own methods about how to invoke the callbacks. */
 		export class _CallbacksHandler {		
-		constructor();		
 		/** 
 		@param target can be null 
 		*/
@@ -7630,7 +8031,6 @@ declare module cc {
 		/** !#en The callbacks invoker to handle and invoke callbacks by key.
 		!#zh CallbacksInvoker 用来根据 Key 管理并调用回调方法。 */
 		export class CallbacksInvoker extends _CallbacksHandler {		
-		constructor();		
 		/**  
 		*/
 		invoke(key : string, p1? : any, p2? : any, p3? : any, p4? : any, p5? : any) : void;		
@@ -7645,7 +8045,6 @@ declare module cc {
 		/** !#en Contains information collected during deserialization
 		!#zh 包含反序列化时的一些信息 */
 		export class Details {		
-		constructor();		
 		/** list of the depends assets' uuid */
 		uuidList : String[];		
 		/** the obj list whose field needs to load asset by uuid */
@@ -7690,36 +8089,17 @@ declare module cc {
 		/** !#en
 		A cc.SpriteFrame has:<br/>
 		 - texture: A cc.Texture2D that will be used by the _ccsg.Sprite<br/>
-		 - rectangle: A rectangle of the texture<br/>
-		<br/>
-		You can modify the frame of a _ccsg.Sprite by doing:<br/>
-		
-		Note: It's not recommended to use SpriteFrame constructor (new SpriteFrame)
-		because its memory usage can't be tracked in native environment, <br/>
-		if you know what you are doing, you may need to manually retain it after creation then
-		release it when you no longer need it.
+		 - rectangle: A rectangle of the texture
 		
 		!#zh
 		一个 SpriteFrame 包含：<br/>
 		 - 纹理：会被 Sprite 使用的 Texture2D 对象。<br/>
-		 - 矩形：在纹理中的矩形区域。<br/>
-		注意：<br/>
-		  不建议用户使用构造函数进行创建，因为其内存使用情况，不能在本地环境中进行跟踪，需要用户手动管理内存，不然会导致严重错误。<br/>
-		  如果你知道你在做什么，你可能需要手动将其保留在创建之后，然后释放它。 */
+		 - 矩形：在纹理中的矩形区域。 */
 		export class SpriteFrame extends Asset {		
-		constructor();		
 		/** !#en
-		Constructor of SpriteFrame class. <br/>
-		Note: It's not recommended to use SpriteFrame constructor (new SpriteFrame)
-		because its memory usage can't be tracked in native environment, <br/>
-		if you know what you are doing, you may need to manually retain it after creation then
-		release it when you no longer need it.
+		Constructor of SpriteFrame class.
 		!#zh
-		SpriteFrame 类的构造函数。<br/>
-		注意：<br/>
-		   不建议用户使用构造函数进行创建，因为其内存使用情况，不能在本地环境中进行跟踪，
-		   需要用户手动管理内存，不然会导致严重错误。<br/>
-		   如果你知道你在做什么，你可能需要手动将其保留在创建之后，然后释放它。
+		SpriteFrame 类的构造函数。
 		@param rotated Whether the frame is rotated in the texture
 		@param offset The offset of the frame in the texture
 		@param originalSize The size of the frame in the texture 
@@ -7898,7 +8278,6 @@ declare module cc {
 		Quads can be re-ordered in runtime <br />
 		The TextureAtlas capacity can be increased or decreased in runtime.</p> */
 		export class TextureAtlas {		
-		constructor();		
 		/** <p>Creates a TextureAtlas with an filename and with an initial capacity for Quads. <br />
 		The TextureAtlas capacity can be increased in runtime. </p>
 		Constructor of cc.TextureAtlas
@@ -9428,7 +9807,6 @@ declare module cc {
 		/** !#en the device accelerometer reports values for each axis in units of g-force.
 		!#zh 设备重力传感器传递的各个轴的数据。 */
 		export class Acceleration {		
-		constructor();		
 		/**  
 		*/
 		Acceleration(x : number, y : number, z : number, timestamp : number) : Acceleration;	
@@ -9461,10 +9839,15 @@ declare module cc {
 		ONE_MINUS_DST_ALPHA = 0,
 		ONE_MINUS_DST_COLOR = 0,
 		blendFuncDisable = 0,	
+	}	
+	/** undefined */
+	export enum TextAlignment {		
+		LEFT = 0,
+		CENTER = 0,
+		RIGHT = 0,	
 	}		
 		/** undefined */
 		export class WebGLColor {		
-		constructor();		
 		/**  
 		*/
 		WebGLColor(r : number, g : number, b : number, a : number, arrayBuffer : any[], offset : number) : WebGLColor;		
@@ -9479,7 +9862,6 @@ declare module cc {
 	}		
 		/** undefined */
 		export class Vertex3F {		
-		constructor();		
 		/**  
 		*/
 		Vertex3F(x : number, y : number, z : number, arrayBuffer : any[], offset : number) : Vertex3F;		
@@ -9487,7 +9869,6 @@ declare module cc {
 	}		
 		/** undefined */
 		export class Tex2F {		
-		constructor();		
 		/**  
 		*/
 		Tex2F(u : number, v : number, arrayBuffer : any[], offset : number) : Tex2F;		
@@ -9495,7 +9876,6 @@ declare module cc {
 	}		
 		/** undefined */
 		export class Quad2 {		
-		constructor();		
 		/**  
 		*/
 		Quad2(tl: (x: number, y: number, arrayBuffer: any[], offset: number) => void, tr: (x: number, y: number, arrayBuffer: any[], offset: number) => void, bl: (x: number, y: number, arrayBuffer: any[], offset: number) => void, br: (x: number, y: number, arrayBuffer: any[], offset: number) => void, arrayBuffer : any[], offset : number) : Quad2;		
@@ -9509,7 +9889,6 @@ declare module cc {
 	}		
 		/** undefined */
 		export class V3F_C4B_T2F {		
-		constructor();		
 		/**  
 		*/
 		V3F_C4B_T2F(vertices: (x: number, y: number, z: number, arrayBuffer: any[], offset: number) => void, colors: (r: number, g: number, b: number, a: number) => void, texCoords: (u: number, v: number, arrayBuffer: any[], offset: number) => void, arrayBuffer : any[], offset : number) : V3F_C4B_T2F;		
@@ -9517,7 +9896,6 @@ declare module cc {
 	}		
 		/** undefined */
 		export class V3F_C4B_T2F_Quad {		
-		constructor();		
 		/**  
 		*/
 		V3F_C4B_T2F_Quad(tl: (vertices: Vertex3F, colors: Color, texCoords: Tex2F, arrayBuffer: any[], offset: number) => void, bl: (vertices: Vertex3F, colors: Color, texCoords: Tex2F, arrayBuffer: any[], offset: number) => void, tr: (vertices: Vertex3F, colors: Color, texCoords: Tex2F, arrayBuffer: any[], offset: number) => void, br: (vertices: Vertex3F, colors: Color, texCoords: Tex2F, arrayBuffer: any[], offset: number) => void, arrayBuffer : any[], offset : number) : V3F_C4B_T2F_Quad;		
@@ -9525,7 +9903,6 @@ declare module cc {
 	}		
 		/** undefined */
 		export class V2F_C4B_T2F {		
-		constructor();		
 		/**  
 		*/
 		V2F_C4B_T2F(vertices: (x: number, y: number, arrayBuffer: any[], offset: number) => void, colors: (r: number, g: number, b: number, a: number) => void, texCoords: (u: number, v: number, arrayBuffer: any[], offset: number) => void, arrayBuffer : any[], offset : number) : V2F_C4B_T2F;		
@@ -9533,7 +9910,6 @@ declare module cc {
 	}		
 		/** undefined */
 		export class V2F_C4B_T2F_Triangle {		
-		constructor();		
 		/**  
 		*/
 		V2F_C4B_T2F_Triangle(a: (vertices: Vertex2F, colors: Color, texCoords: Tex2F, arrayBuffer: any[], offset: number) => void, b: (vertices: Vertex2F, colors: Color, texCoords: Tex2F, arrayBuffer: any[], offset: number) => void, c: (vertices: Vertex2F, colors: Color, texCoords: Tex2F, arrayBuffer: any[], offset: number) => void, arrayBuffer : any[], offset : number) : V2F_C4B_T2F_Triangle;	
@@ -9541,7 +9917,6 @@ declare module cc {
 		/** !#en The base class of all value types.
 		!#zh 所有值类型的基类。 */
 		export class ValueType {		
-		constructor();		
 		/** !#en This method returns an exact copy of current value.
 		!#zh 克隆当前值，该方法返回一个新对象，新对象的值和原对象相等。 
 		*/
@@ -9568,7 +9943,6 @@ declare module cc {
 		/** !#en Representation of 2D vectors and points.
 		!#zh 表示 2D 向量和坐标 */
 		export class Vec2 extends ValueType {		
-		constructor();		
 		/** !#en
 		Constructor
 		see {{#crossLink "cc/vec2:method"}}cc.v2{{/crossLink}} or {{#crossLink "cc/p:method"}}cc.p{{/crossLink}}
@@ -9892,10 +10266,25 @@ declare module cc {
 		ZERO : Vec2;		
 		/** !#en return a Vec2 object with x = 0 and y = 1.
 		!#zh 返回 x = 0 和 y = 1 的 Vec2 对象。 */
-		up : Vec2;		
+		UP : Vec2;		
 		/** !#en return a Vec2 object with x = 1 and y = 0.
 		!#zh 返回 x = 1 和 y = 0 的 Vec2 对象。 */
 		RIGHT : Vec2;	
+	}	
+	
+	/****************************************************
+	* audioEngine
+	*****************************************************/
+	
+	export module audioEngine {		
+		/** !#en Audio state.
+		!#zh 声音播放状态 */
+		export enum AudioState {			
+			ERROR = 0,
+			INITIALZING = 0,
+			PLAYING = 0,
+			PAUSED = 0,		
+		}	
 	}	
 	
 	/****************************************************
@@ -9985,7 +10374,8 @@ declare module cc {
 		export enum Transition {			
 			NONE = 0,
 			COLOR = 0,
-			SPRITE = 0,		
+			SPRITE = 0,
+			SCALE = 0,		
 		}	
 	}	
 	
@@ -10012,6 +10402,9 @@ declare module cc {
 			/** !#en Event handler
 			!#zh 响应事件函数名 */
 			handler : string;			
+			/** !#en Custom Event Data
+			!#zh 自定义事件数据 */
+			customEventData : string;			
 			/**  
 			*/
 			emitEvents(events : Component.EventHandler[], params : any) : void;			
@@ -10223,6 +10616,44 @@ declare module cc {
 	}	
 	
 	/****************************************************
+	* PageView
+	*****************************************************/
+	
+	export module PageView {		
+		/** !#en The Page View Direction
+		!#zh 页面视图滚动类型 */
+		export enum Direction {			
+			Horizontal = 0,
+			Vertical = 0,		
+		}	
+	}	
+	
+	/****************************************************
+	* PageView
+	*****************************************************/
+	
+	export module PageView {		
+		/** !#en Enum for ScrollView event type.
+		!#zh 滚动视图事件类型 */
+		export enum EventType {			
+			PAGE_TURNING = 0,		
+		}	
+	}	
+	
+	/****************************************************
+	* PageViewIndicator
+	*****************************************************/
+	
+	export module PageViewIndicator {		
+		/** !#en Enum for PageView Indicator direction
+		!#zh 页面视图指示器的摆放方向 */
+		export enum Direction {			
+			HORIZONTAL = 0,
+			VERTICAL = 0,		
+		}	
+	}	
+	
+	/****************************************************
 	* ProgressBar
 	*****************************************************/
 	
@@ -10267,6 +10698,19 @@ declare module cc {
 			BOUNCE_RIGHT = 0,
 			AUTOSCROLL_ENDED = 0,
 			TOUCH_UP = 0,		
+		}	
+	}	
+	
+	/****************************************************
+	* Slider
+	*****************************************************/
+	
+	export module Slider {		
+		/** !#en The Slider Direction
+		!#zh 滑动器方向 */
+		export enum Direction {			
+			Horizontal = 0,
+			Vertical = 0,		
 		}	
 	}	
 	
@@ -10363,7 +10807,6 @@ declare module cc {
 			/** !#en The Custom event
 			!#zh 自定义事件 */
 			export class EventCustom extends Event {			
-			constructor();			
 			/** 
 			@param type The name of the event (case-sensitive), e.g. "click", "fire", or "submit"
 			@param bubbles A boolean indicating whether the event bubbles up through the tree or not 
@@ -10395,11 +10838,6 @@ declare module cc {
 			/** !#en The mouse event
 			!#zh 鼠标事件类型 */
 			export class EventMouse extends Event {			
-			/** 
-			@param eventType The mouse event type, UP, DOWN, MOVE, CANCELED
-			@param bubbles A boolean indicating whether the event bubbles up through the tree or not 
-			*/
-			constructor(eventType : number, bubbles? : boolean);			
 			/** !#en Sets scroll data.
 			!#zh 设置鼠标的滚动数据。 
 			*/
@@ -10467,11 +10905,6 @@ declare module cc {
 			/** !#en The touch event
 			!#zh 触摸事件 */
 			export class EventTouch extends Event {			
-			/** 
-			@param touchArr The array of the touches
-			@param bubbles A boolean indicating whether the event bubbles up through the tree or not 
-			*/
-			constructor(touchArr : any[], bubbles : boolean);			
 			/** !#en Returns event code.
 			!#zh 获取事件类型。 
 			*/
@@ -10534,12 +10967,7 @@ declare module cc {
 	export module Event {			
 			/** !#en The acceleration event
 			!#zh 加速度事件 */
-			export class EventAcceleration extends Event {			
-			/** 
-			@param acc The acceleration
-			@param bubbles A boolean indicating whether the event bubbles up through the tree or not 
-			*/
-			constructor(acc : any, bubbles : boolean);		
+			export class EventAcceleration extends Event {		
 		}	
 	}	
 	
@@ -10550,13 +10978,21 @@ declare module cc {
 	export module Event {			
 			/** !#en The keyboard event
 			!#zh 键盘事件 */
-			export class EventKeyboard extends Event {			
-			/** 
-			@param keyCode The key code of which triggered this event
-			@param isPressed A boolean indicating whether the key have been pressed
-			@param bubbles A boolean indicating whether the event bubbles up through the tree or not 
-			*/
-			constructor(keyCode : number, isPressed : boolean, bubbles : boolean);		
+			export class EventKeyboard extends Event {		
+		}	
+	}	
+	
+	/****************************************************
+	* SystemEvent
+	*****************************************************/
+	
+	export module SystemEvent {		
+		/** !#en The event type supported by SystemEvent
+		!#zh SystemEvent 支持的事件类型 */
+		export enum EventType {			
+			KEY_DOWN = 0,
+			KEY_UP = 0,
+			DEVICEMOTION = 0,		
 		}	
 	}	
 	
@@ -10655,6 +11091,20 @@ declare module cc {
 	}	
 	
 	/****************************************************
+	* LoadingItems
+	*****************************************************/
+	
+	export module LoadingItems {		
+		/** !#en The item states of the LoadingItems, its value could be LoadingItems.ItemState.WORKING | LoadingItems.ItemState.COMPLETET | LoadingItems.ItemState.ERROR
+		!#zh LoadingItems 队列中的加载项状态，状态的值可能是 LoadingItems.ItemState.WORKING | LoadingItems.ItemState.COMPLETET | LoadingItems.ItemState.ERROR */
+		export enum ItemState {			
+			WORKING = 0,
+			COMPLETET = 0,
+			ERROR = 0,		
+		}	
+	}	
+	
+	/****************************************************
 	* Texture2D
 	*****************************************************/
 	
@@ -10683,7 +11133,6 @@ declare module anysdk {
 		!#zh
 		插件管理类 */
 		export class AgentManager {		
-		constructor();		
 		/** !#en
 		AppKey appSecret and privateKey are the only three parameters generated
 		after the packing tool client finishes creating the game.
@@ -11626,7 +12075,6 @@ declare module anysdk {
 		!#zh
 		数据结构类 */
 		export class PluginParam {		
-		constructor();		
 		/** !#en
 		create plugin parameters
 		!#zh
@@ -11826,14 +12274,7 @@ properties and constants of Spine are defined in this namespace
 !#zh
 Spine 的全局的命名空间，
 与 Spine 相关的所有的类，函数，属性，常量都在这个命名空间中定义。 */
-declare module sp {	
-	/** !#en
-	The official spine runtime.<br/>
-	See http://en.esotericsoftware.com/spine-using-runtimes
-	!#zh
-	官方 Spine Runtime。<br/>
-	可查看 Spine 官方文档 http://en.esotericsoftware.com/spine-using-runtimes */
-	export var spine : any;		
+declare module sp {		
 		/** !#en
 		The skeleton of Spine <br/>
 		<br/>
@@ -11846,8 +12287,7 @@ declare module sp {
 		(Skeleton 具有对骨骼数据的引用并且存储了骨骼实例的状态，
 		它由当前的骨骼动作，slot 颜色，和可见的 slot attachments 组成。<br/>
 		多个 Skeleton 可以使用相同的骨骼数据，其中包括所有的动画，皮肤和 attachments。 */
-		export class Skeleton extends cc._RendererUnderSG {		
-		constructor();		
+		export class Skeleton extends _RendererUnderSG {		
 		/** !#en The skeletal animation is paused?
 		!#zh 该骨骼动画是否暂停。 */
 		paused : boolean;		
@@ -11873,6 +12313,12 @@ declare module sp {
 		/** !#en TODO
 		!#zh 是否循环播放当前骨骼动画。 */
 		loop : boolean;		
+		/** !#en Indicates whether to enable premultiplied alpha.
+		You should disable this option when image's transparent area appears to have opaque pixels,
+		or enable this option when image's half transparent area appears to be darken.
+		!#zh 是否启用贴图预乘。
+		当图片的透明区域出现色块时需要关闭该选项，当图片的半透明区域颜色变黑时需要启用该选项。 */
+		premultipliedAlpha : boolean;		
 		/** !#en The time scale of this skeleton.
 		!#zh 当前骨骼中所有动画的时间缩放率。 */
 		timeScale : number;		
@@ -11919,41 +12365,41 @@ declare module sp {
 		/** !#en
 		Finds a bone by name.
 		This does a string comparison for every bone.<br>
-		Returns a {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.Bone object.
+		Returns a {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.Bone object.
 		!#zh
 		通过名称查找 bone。
 		这里对每个 bone 的名称进行了对比。<br>
-		返回一个 {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.Bone 对象。 
+		返回一个 {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.Bone 对象。 
 		*/
-		findBone(boneName : string) : spine.Bone;		
+		findBone(boneName : string) : sp.spine.Bone;		
 		/** !#en
 		Finds a slot by name. This does a string comparison for every slot.<br>
-		Returns a {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.Slot object.
+		Returns a {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.Slot object.
 		!#zh
 		通过名称查找 slot。这里对每个 slot 的名称进行了比较。<br>
-		返回一个 {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.Slot 对象。 
+		返回一个 {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.Slot 对象。 
 		*/
-		findSlot(slotName : string) : spine.Slot;		
+		findSlot(slotName : string) : sp.spine.Slot;		
 		/** !#en
 		Finds a skin by name and makes it the active skin.
 		This does a string comparison for every skin.<br>
 		Note that setting the skin does not change which attachments are visible.<br>
-		Returns a {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.Skin object.
+		Returns a {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.Skin object.
 		!#zh
 		按名称查找皮肤，激活该皮肤。这里对每个皮肤的名称进行了比较。<br>
 		注意：设置皮肤不会改变 attachment 的可见性。<br>
-		返回一个 {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.Skin 对象。 
+		返回一个 {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.Skin 对象。 
 		*/
-		setSkin(skinName : string) : spine.Skin;		
+		setSkin(skinName : string) : sp.spine.Skin;		
 		/** !#en
 		Returns the attachment for the slot and attachment name.
 		The skeleton looks first in its skin, then in the skeleton data’s default skin.<br>
-		Returns a {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.Attachment object.
+		Returns a {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.Attachment object.
 		!#zh
 		通过 slot 和 attachment 的名称获取 attachment。Skeleton 优先查找它的皮肤，然后才是 Skeleton Data 中默认的皮肤。<br>
-		返回一个 {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.Attachment 对象。 
+		返回一个 {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.Attachment 对象。 
 		*/
-		getAttachment(slotName : string, attachmentName : string) : spine.Attachment;		
+		getAttachment(slotName : string, attachmentName : string) : sp.spine.Attachment;		
 		/** !#en
 		Sets the attachment for the slot and attachment name.
 		The skeleton looks first in its skin, then in the skeleton data’s default skin.
@@ -11965,13 +12411,13 @@ declare module sp {
 		/** !#en Sets skeleton data to sp.Skeleton.
 		!#zh 设置 Skeleton 中的 Skeleton Data。 
 		*/
-		setSkeletonData(skeletonData : spine.SkeletonData, ownsSkeletonData : spine.SkeletonData) : void;		
+		setSkeletonData(skeletonData : sp.spine.SkeletonData, ownsSkeletonData : sp.spine.SkeletonData) : void;		
 		/** !#en Sets animation state data.<br>
-		The parameter type is {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.AnimationStateData.
+		The parameter type is {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.AnimationStateData.
 		!#zh 设置动画状态数据。<br>
-		参数是 {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.AnimationStateData。 
+		参数是 {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.AnimationStateData。 
 		*/
-		setAnimationStateData(stateData : spine.AnimationStateData) : void;		
+		setAnimationStateData(stateData : sp.spine.AnimationStateData) : void;		
 		/** !#en
 		Mix applies all keyframe values,
 		interpolated for the specified time and mixed with the current values.
@@ -11983,23 +12429,23 @@ declare module sp {
 		*/
 		setAnimationListener(target : any, callback : Function) : void;		
 		/** !#en Set the current animation. Any queued animations are cleared.<br>
-		Returns a {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.TrackEntry object.
+		Returns a {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.TrackEntry object.
 		!#zh 设置当前动画。队列中的任何的动画将被清除。<br>
-		返回一个 {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.TrackEntry 对象。 
+		返回一个 {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.TrackEntry 对象。 
 		*/
-		setAnimation(trackIndex : number, name : string, loop : boolean) : spine.TrackEntry;		
+		setAnimation(trackIndex : number, name : string, loop : boolean) : sp.spine.TrackEntry;		
 		/** !#en Adds an animation to be played delay seconds after the current or last queued animation.<br>
-		Returns a {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.TrackEntry object.
+		Returns a {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.TrackEntry object.
 		!#zh 添加一个动画到动画队列尾部，还可以延迟指定的秒数。<br>
-		返回一个 {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.TrackEntry 对象。 
+		返回一个 {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.TrackEntry 对象。 
 		*/
-		addAnimation(trackIndex : number, name : string, loop : boolean, delay? : number) : spine.TrackEntry;		
+		addAnimation(trackIndex : number, name : string, loop : boolean, delay? : number) : sp.spine.TrackEntry;		
 		/** !#en Returns track entry by trackIndex.<br>
-		Returns a {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.TrackEntry object.
+		Returns a {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.TrackEntry object.
 		!#zh 通过 track 索引获取 TrackEntry。<br>
-		返回一个 {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.TrackEntry 对象。 
+		返回一个 {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.TrackEntry 对象。 
 		*/
-		getCurrent(trackIndex : void) : spine.TrackEntry;		
+		getCurrent(trackIndex : void) : sp.spine.TrackEntry;		
 		/** !#en Clears all tracks of animation state.
 		!#zh 清除所有 track 的动画状态。 
 		*/
@@ -12019,12 +12465,12 @@ declare module sp {
 	}		
 		/** !#en The skeleton data of spine.
 		!#zh Spine 的 骨骼数据。 */
-		export class SkeletonData extends cc.Asset {		
+		export class SkeletonData extends Asset {		
 		/** !#en See http://en.esotericsoftware.com/spine-json-format
 		!#zh 可查看 Spine 官方文档 http://zh.esotericsoftware.com/spine-json-format */
 		skeletonJson : any;		
 		atlasText : string;		
-		textures : cc.Texture2D;		
+		textures : Texture2D;		
 		/** !#en
 		A scale can be specified on the JSON or binary loader which will scale the bone positions,
 		image sizes, and animation translations.
@@ -12036,11 +12482,11 @@ declare module sp {
 		!#zh 可查看 Spine 官方文档： http://zh.esotericsoftware.com/spine-using-runtimes#Scaling */
 		scale : number;		
 		/** !#en Get the included SkeletonData used in spine runtime.<br>
-		Returns a {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.SkeletonData object.
+		Returns a {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.SkeletonData object.
 		!#zh 获取 Spine Runtime 使用的 SkeletonData。<br>
-		返回一个 {{#crossLinkModule "spine"}}spine{{/crossLinkModule}}.SkeletonData 对象。 
+		返回一个 {{#crossLinkModule "sp.spine"}}sp.spine{{/crossLinkModule}}.SkeletonData 对象。 
 		*/
-		getRuntimeData(quiet? : boolean) : spine.SkeletonData;	
+		getRuntimeData(quiet? : boolean) : sp.spine.SkeletonData;	
 	}	
 	/** !#en The event type of spine skeleton animation.
 	!#zh 骨骼动画事件类型。 */
@@ -12052,11 +12498,22 @@ declare module sp {
 	}
 }
 /** !#en
-`spine` is the namespace for official Spine Runtime, which officially implemented and maintained by Spine.<br>
+`sp.spine` is the namespace for official Spine Runtime, which officially implemented and maintained by Spine.<br>
 Please refer to the official documentation for its detailed usage: [http://en.esotericsoftware.com/spine-using-runtimes](http://en.esotericsoftware.com/spine-using-runtimes)
 !#zh
-spine 模块是 Spine 官方运行库的 API 入口，由 Spine 官方统一实现和维护，具体用法请参考：[http://zh.esotericsoftware.com/spine-using-runtimes](http://zh.esotericsoftware.com/spine-using-runtimes) */
-declare module spine {
+sp.spine 模块是 Spine 官方运行库的 API 入口，由 Spine 官方统一实现和维护，具体用法请参考：[http://zh.esotericsoftware.com/spine-using-runtimes](http://zh.esotericsoftware.com/spine-using-runtimes) */
+declare module sp.spine {
+}
+/** module that contains all Dragon Bones runtime API */
+declare module dragonBones {
+}
+/** !#en
+The global main namespace of DragonBones, all classes, functions,
+properties and constants of DragonBones are defined in this namespace
+!#zh
+DragonBones 的全局的命名空间，
+与 DragonBones 相关的所有的类，函数，属性，常量都在这个命名空间中定义。 */
+declare module db {
 }
 /** This module provides some JavaScript utilities.
 All members can be accessed with cc.js */
@@ -12138,15 +12595,20 @@ declare module js {
 	export function formatStr() : string;		
 		/** undefined */
 		export class array {		
-		/** Removes the first occurrence of a specific object from the array. 
-		*/
-		remove(array : any[], value : any) : boolean;		
 		/** Removes the array item at the specified index. 
 		*/
 		removeAt(array : any[], index : number) : void;		
-		/** Determines whether the array contains a specific value. 
+		/** Removes the array item at the specified index.
+		It's faster but the order of the array will be changed. 
 		*/
-		contains(array : any[], value : any) : boolean;		
+		fastRemoveAt(array : any[], index : number) : void;		
+		/** Removes the first occurrence of a specific object from the array. 
+		*/
+		remove(array : any[], value : any) : boolean;		
+		/** Removes the first occurrence of a specific object from the array.
+		It's faster but the order of the array will be changed. 
+		*/
+		fastRemove(array : any[], value : number) : void;		
 		/** Verify array's Type 
 		*/
 		verifyType(array : any[], type : Function) : boolean;		
@@ -12158,9 +12620,6 @@ declare module js {
 		/** Inserts some objects at index 
 		*/
 		appendObjectsAt(array : any[], addObjs : any[], index : number) : any[];		
-		/** Copy an array's item to a new array (its performance is better than Array.slice) 
-		*/
-		copy(array : any[]) : any[];		
 		/** Exact same function as Array.prototype.indexOf.
 		HACK: ugliy hack for Baidu mobile browser compatibility,
 		stupid Baidu guys modify Array.prototype.indexOf for all pages loaded,
@@ -12173,6 +12632,12 @@ declare module js {
 		@param searchElement Element to locate in the array.
 		@param fromIndex The index to start the search at 
 		*/
-		indexOf(searchElement : any, fromIndex? : number) : number;	
+		indexOf(searchElement : any, fromIndex? : number) : number;		
+		/** Determines whether the array contains a specific value. 
+		*/
+		contains(array : any[], value : any) : boolean;		
+		/** Copy an array's item to a new array (its performance is better than Array.slice) 
+		*/
+		copy(array : any[]) : any[];	
 	}
 }
