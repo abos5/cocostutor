@@ -1,13 +1,8 @@
-# my regular gitignore file
+# cocos creator git ignore files
+# ignore files like meta would cause project to crash 
 
-# cocos creator projects
-hellouniverse
-polished_project
-sample
-local
-tutorial-blackjack
-## project that crashed
-start_project
+
+
 
 #/////////////////////////////////////////////////////////////////////////////
 # Fireball Projects
