@@ -1,13 +1,16 @@
 /**
  * @todo
  * @done 加入简单的开始菜单界面，在游戏运行的一开始显示开始按钮，点击按钮后才会开始游戏
- * 为游戏失败加入简单的菜单界面，游戏失败后点击按钮才会重新开始
- *   starPrefab 需要加入 NodePool 
+ * @done 为游戏失败加入简单的菜单界面，游戏失败后点击按钮才会重新开始
+ * @done 修改监听事件的方法， 改为 self.canvas.on
  * @done 限制主角的移动不能超过视窗边界
  * @done 为主角的跳跃动作加入更细腻的动画表现
+ * @done 为触屏设备加入输入控制
+ * 
+ * starPrefab 需要加入 NodePool 
  * 为星星消失的状态加入计时进度条
  * 收集星星时加入更华丽的效果
- * 为触屏设备加入输入控制
+ * 优化触屏控制， 改为跟随触摸地点移动
  */
 const Player = require('Player');
 // const ScoreFX = require('ScoreFX');
@@ -35,6 +38,7 @@ cc.Class({
         // 星星产生后消失时间的随机范围
         maxStarDuration: 0,
         minStarDuration: 0,
+        score: 0,
         // 地面节点，用于确定星星生成的高度
         ground: {
             default: null,
@@ -57,56 +61,50 @@ cc.Class({
             default: null,
             type: cc.Node
         },
-        score: {
-            default: 0,
-            visible: false,
-            type: cc.Integer
-        },
         fpsDisplay: {
             default: null,
             type: cc.Label
         },
-        fps: {
-            default: 0,
-            visible: false,
-            type: cc.Integer
-        },
-        fpsSecond: {
-            default: 0,
-            visible: false,
-            type: cc.Integer
-        },
         gameFailed: {
             default: null,
             type: cc.Label,
-        }
-    },
+        },
+        remote: null,
 
+    },
     // use this for initialization
-    onLoad: function () {
+    onLoad () {
         // 获取地平面的 y 轴坐标
         this.groundY = this.ground.node.y + this.ground.node.height/2;        
         this.player.game = this;
         this.hideGameFailed()
         
+        // debug information
         // this.gameFailed.node.active = false
     },
     hideGameFailed () { 
         this.gameFailed.node.runAction(cc.hide())
     },
-    onStartGame: function() {
+    connect () {
+        
+        if (this.remote) {
+            return this.remote
+        }
+        
         var begin = Date.now()
-        var st = io.connect('ws://node.abos.space:3000');
-        st.on('connect', function(){
+        this.remote = io.connect('ws://node.abos.space:3000/chat');
+        this.remote.on('connect', function(){
             cc.log(['spend:', Date.now() - begin, 'to connect'].join(' '))
         });
-        st.on('message', function(msg){
+        this.remote.on('message', function(msg){
             cc.log(msg)
         });
-        st.on('disconnect', function() {
+        this.remote.on('disconnect', function() {
             cc.log('disconnected')
         }) 
-        
+    },
+    onStartGame () {
+        this.connect()        
         // 初始化计时器
         this.timer        = 0;
         this.starDuration = 0;

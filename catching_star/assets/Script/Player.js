@@ -12,14 +12,14 @@ cc.Class({
         //    readonly: false,    // optional, default is false
         // },
 
-        jumpHeight: 0,
-        jumpDuration: 0,
+        jumpHeight: 240,
+        jumpDuration: 1.1,
         squashDuration: 0.2,
         strech0Duration: 0.2,
         strech1Duration: 0.5,
         scaleBackDuration: 0.4,
-        maxMoveSpeed: 0,
-        accel: 0,
+        maxMoveSpeed: 12,
+        accel: 5, // 速度的增加操作应该放在 update 里， 放在 update 里的动作自然就一帧帧地增长了.
 
         // 跳跃音效
         jumpAudio: {
@@ -29,7 +29,7 @@ cc.Class({
     },
 
     // use this for initialization
-    onLoad: function () {
+    onLoad () {
         // 加速度方向开关
         this.accLeft = false;
         this.accRight = false;
@@ -41,13 +41,16 @@ cc.Class({
         this.setInputControl();
         this.jumpAction = this.setJumpAction()
     },
-    onStartGame: function() {
+    onStartGame () {
         this.node.runAction(this.jumpAction);
     },
-    onStopGame: function() {
+    onStopGame () {
+        // this.xSpeed = 0
+        this.accLeft = false
+        this.accRight = false
         this.node.stopAllActions();
     },
-    setJumpAction: function() {
+    setJumpAction () {
         // 跳跃上升
         var jumpUp = cc.moveBy(this.jumpDuration, cc.p(0, this.jumpHeight)).easing(cc.easeCubicActionOut());
         // 下落
@@ -55,7 +58,7 @@ cc.Class({
         // 形变
         var squash = cc.scaleTo(this.squashDuration, 1, 0.4)
         var strech0 = cc.scaleTo(this.strech0Duration, 1, 1.3)
-        var strech1 = cc.scaleTo(this.strech1Duration, 1, 1.6)
+        var strech1 = cc.scaleTo(this.strech1Duration, 1, 1.5)
         var scaleBack = cc.scaleTo(this.scaleBackDuration, 1, 1)
         var callback = cc.callFunc(this.playJumpSound, this)
         // 不断重复
@@ -68,9 +71,26 @@ cc.Class({
     playJumpSound () {
         cc.audioEngine.playEffect(this.jumpAudio)
     },
-    setInputControl: function () {
+    onTouch (event) {
+        var touch = event.getTouches()[0]
+        var touchLoc = touch.getLocation()
+        if (touchLoc.x > cc.winSize.width/2) {
+            this.accLeft = false
+            this.accRight = true
+        } else {
+            this.accLeft = true
+            this.accRight = false
+        } 
+    },
+    setInputControl () {
         var self = this;
         // 添加键盘事件监听
+        self.game.node.on(cc.Node.EventType.TOUCH_START, self.onTouch, self);
+        self.game.node.on(cc.Node.EventType.TOUCH_MOVE, self.onTouch, self);
+        self.game.node.on(cc.Node.EventType.TOUCH_END, (event) => {
+            self.accLeft = false
+            self.accRight = false
+        }, self)
         cc.eventManager.addListener({
             event: cc.EventListener.KEYBOARD,
             // 有按键按下时，判断是否是我们指定的方向控制键，并设置向对应方向加速
@@ -97,17 +117,17 @@ cc.Class({
                         break;
                 }
             }
-        }, self.node);
+        }, self.node)
     },
 
     // called every frame, uncomment this function to activate update callback
-    update: function (dt) {
+    update (dt) {
         if (! this.game.running) {
             return ;
         }
         this.updatePlayerPosition(dt);
     },
-    updatePlayerPosition: function(dt) {
+    updatePlayerPosition (dt) {
         let finalX = 0;
         // 根据当前加速度方向每帧更新速度
         if (this.accLeft) {
