@@ -90,16 +90,17 @@ cc.Class({
         this.hideGameFailed()
         
         var begin = Date.now()
-        var st = io.connect('ws://node.abos.space:3000');
-        st.on('connect', function(){
-            cc.log(['spend:', Date.now() - begin, 'to connect'].join(' '))
-        });
         // this.gameFailed.node.active = false
     },
     hideGameFailed () { 
         this.gameFailed.node.runAction(cc.hide())
     },
     onStartGame: function() {
+        
+        var st = io.connect('ws://node.abos.space:3000');
+        st.on('connect', function(){
+            cc.log(['spend:', Date.now() - begin, 'to connect'].join(' '))
+        });
         st.on('message', function(msg){
             cc.log(msg)
         });
