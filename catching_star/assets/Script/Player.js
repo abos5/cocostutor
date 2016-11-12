@@ -80,7 +80,7 @@ cc.Class({
         } else {
             this.accLeft = true
             this.accRight = false
-        } 
+        }
     },
     setInputControl () {
         var self = this;
@@ -144,7 +144,7 @@ cc.Class({
         }
 
         // 根据当前速度更新主角的位置, 且当前位置不能大于边界
-        finalX  = this.node.x + this.xSpeed * dt; 
+        finalX  = this.node.x + this.xSpeed * dt;
         if (Math.abs(finalX) > this.maxX) {
             let reverse = finalX >= 0 ? 1 : -1
             finalX = reverse * this.maxX

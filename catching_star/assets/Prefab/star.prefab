@@ -97,7 +97,10 @@
       "__id__": 1
     },
     "_enabled": true,
-    "pickRadius": 60
+    "pickRadius": 60,
+    "scoreAudio": {
+      "__uuid__": "c2d7cac0-046d-4bfc-b7a6-f0c7164105ca"
+    }
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -105,7 +108,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "7392f491-f24c-426c-a98a-ed51253301d5"
     },
     "fileId": "f5fc4fySKNNtp/naZUoi2Du",
     "sync": false

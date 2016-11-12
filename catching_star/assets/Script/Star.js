@@ -2,23 +2,26 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        // foo: {
-        //    default: null,      // The default value will be used only when the component attaching
-        //                           to a node for the first time
-        //    url: cc.Texture2D,  // optional, default is typeof default
-        //    serializable: true, // optional, default is true
-        //    visible: true,      // optional, default is true
-        //    displayName: 'Foo', // optional
-        //    readonly: false,    // optional, default is false
-        // },
-        pickRadius: 60
+        pickRadius: 0,
+        // remote: null,
+        scoreAudio: {
+            default: null,
+            url: cc.AudioClip
+        },
     },
 
     // use this for initialization
-    onLoad: function () {
+    onLoad () {
     },
-
-    getPlayerDistance: function () {
+    init (game) {
+        this.game    = game
+        this.enabled = true
+        this.node.opacity = 255
+    },
+    reuse (game) {
+        this.init(game)
+    },
+    getPlayerDistance () {
         // 根据 player 节点位置判断距离
         var playerPos = this.game.player.node.getPosition();
         // 根据两点位置计算两点之间距离
@@ -26,21 +29,25 @@ cc.Class({
         return dist;
     },
 
-    onPicked: function() {
-        // 当星星被收集时，调用 Game 脚本中的接口，生成一个新的星星
-        this.game.spawnNewStar();
+    onPicked () {
+        // 播放当前星星专属的音乐
+        this.game.playStarPickedAudio(this.scoreAudio)
+        // 当星星被收集时，调用 Game 脚本中的接口，销毁当前星星节点， 生成一个新的星星
+        this.game.despawnStar();
+        // 调用 Game 脚本的得分方法
         this.game.gainScore()
-        // 然后销毁当前星星节点
-        this.node.destroy();
     },
-
     // called every frame, uncomment this function to activate update callback
-    update: function (dt) {
+    update (dt) {
         // 每帧判断和主角之间的距离是否小于收集距离
         if (this.getPlayerDistance() < this.pickRadius) {
             // 调用收集行为
             this.onPicked();
             return;
         }
+
+        var opacityRatio = 1 - this.game.timer/this.game.starDuration
+        var minOpacity = 50
+        this.node.opacity = minOpacity + Math.floor(opacityRatio * (255 - minOpacity))
     },
 });
