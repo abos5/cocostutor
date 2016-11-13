@@ -119,11 +119,11 @@ cc.Class({
         this.playBtn.active = false
         this.hideGameFailed()
         this.gameFailed.node.runAction(cc.rotateTo(0.1, 0, 0))
-        this.player.node.setPositionY(this.groundY)
         // 初始化计分
         this.score = 0
         // 让主角继续跳
-        this.player.onStartGame()
+        var pos = cc.p(0, this.groundY)
+        this.player.onStartGame(pos)
         // 生成一个新的星星
         this.spawnNewStar()
         this.setScoreDisplay()

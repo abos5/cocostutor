@@ -41,7 +41,9 @@ cc.Class({
         this.setInputControl();
         this.jumpAction = this.setJumpAction()
     },
-    onStartGame () {
+    onStartGame (pos) {
+        this.xSpeed = 0
+        this.node.setPosition(pos)
         this.node.runAction(this.jumpAction);
     },
     onStopGame () {
