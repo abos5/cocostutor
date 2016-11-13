@@ -9,12 +9,16 @@
  *
  * @done starPrefab 需要加入 NodePool
  * @done 为星星消失的状态加入计时进度条
- * 收集星星时加入更华丽的效果
+ * @done 收集星星的时候播放音效
+ *
+ * @done 修改星星播放的动画特效， 改为与 polished project 一致
+ * @done 修改收集星星播放特性时的声音播放到 ScoreFX 里去管理
+ * @done 收集星星的时候播放动画
  * 优化触屏控制， 改为跟随触摸地点移动
  */
-const Player = require('Player');
-// const ScoreFX = require('ScoreFX');
-const Star = require('Star')
+const Player  = require('Player')
+const ScoreFX = require('ScoreFX')
+const Star    = require('Star')
 
 cc.Class({
     extends: cc.Component,
@@ -32,6 +36,10 @@ cc.Class({
 
         // 这个属性引用了星星预制资源
         starPrefab: {
+            default: null,
+            type: cc.Prefab
+        },
+        scoreFXPrefab: {
             default: null,
             type: cc.Prefab
         },
@@ -74,29 +82,24 @@ cc.Class({
     // use this for initialization
     onLoad () {
         // 获取地平面的 y 轴坐标
-        this.groundY = this.ground.node.y + this.ground.node.height/2;
+        this.groundY     = this.ground.node.y + this.ground.node.height/2;
         this.player.game = this;
+        this.starPool    = new cc.NodePool('Star')
+        this.scoreFXPool = new cc.NodePool('ScoreFX')
         this.hideGameFailed()
-        this.starPool = new cc.NodePool('Star')
-
-        // debug information
-        // this.gameFailed.node.active = false
     },
     hideGameFailed () {
         this.gameFailed.node.runAction(cc.hide())
     },
-    playStarPickedAudio (scoreAudio) {
-        cc.audioEngine.playEffect(scoreAudio)
-    },
     connect () {
-        // disabled when on internet connection
-        return;
+        // disabled when no internet connection
+        // return;
         if (this.remote) {
             return this.remote
         }
 
         var begin = Date.now()
-        this.remote = io.connect('ws://node.abos.space:3000/chat');
+        this.remote = io.connect('ws://node.abos.space:3000');
         this.remote.on('connect', function(){
             cc.log(['spend:', Date.now() - begin, 'to connect'].join(' '))
         });
@@ -114,7 +117,6 @@ cc.Class({
         this.starDuration = 0
         this.running      = true
         this.playBtn.active = false
-        // this.gameFailed.node.active = false
         this.hideGameFailed()
         this.gameFailed.node.runAction(cc.rotateTo(0.1, 0, 0))
         this.player.node.setPositionY(this.groundY)
@@ -124,9 +126,27 @@ cc.Class({
         this.player.onStartGame()
         // 生成一个新的星星
         this.spawnNewStar()
+        this.setScoreDisplay()
     },
-
-    spawnNewStar: function() {
+    setScoreDisplay () {
+        this.scoreDisplay.string = this.score.toString()
+    },
+    spawnScoreFX (pos) {
+        var scoreFX = null
+        if (this.scoreFXPool.size() > 0) {
+            scoreFX = this.scoreFXPool.get(this).getComponent('ScoreFX')
+            scoreFX.init(this)
+        } else {
+            scoreFX = cc.instantiate(this.scoreFXPrefab).getComponent('ScoreFX')
+        }
+        this.node.addChild(scoreFX.node)
+        scoreFX.node.setPosition(pos)
+        scoreFX.play()
+    },
+    despawnScoreFX (scoreFX) {
+        this.scoreFXPool.put(scoreFX)
+    },
+    spawnNewStar () {
         // 使用给定的模板在场景中生成一个新节点
         var newStar = null
 
@@ -168,10 +188,11 @@ cc.Class({
         // 返回星星坐标
         return cc.p(randX, randY)
     },
-    gainScore ()
+    gainScore (pos)
     {
         this.score += 1
-        this.scoreDisplay.string = this.score.toString()
+        this.setScoreDisplay()
+        this.spawnScoreFX(pos)
     },
 
     // called every frame, uncomment this function to activate update callback

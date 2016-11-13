@@ -3,70 +3,49 @@
   "_name": "score_pop",
   "_objFlags": 0,
   "_rawFiles": null,
-  "_duration": 0.13333333333333333,
-  "sample": 60,
+  "_duration": 0.8,
+  "sample": 25,
   "speed": 1,
   "wrapMode": 1,
   "curveData": {
-    "props": {
-      "y": [
-        {
-          "frame": 0,
-          "value": -195
-        },
-        {
-          "frame": 0.13333333333333333,
-          "value": 116
-        }
-      ],
-      "opacity": [
-        {
-          "frame": 0.05,
-          "value": 255
-        },
-        {
-          "frame": 0.13333333333333333,
-          "value": 0
-        }
-      ]
-    },
+    "props": {},
     "paths": {
       "pop": {
         "comps": {
           "cc.Sprite": {
             "spriteFrame": [
               {
-                "frame": 0.016666666666666666,
+                "frame": 0.04,
                 "value": {
                   "__uuid__": "a8603c7f-e6d3-4688-91c2-85311f62ebf2"
                 }
               },
               {
-                "frame": 0.03333333333333333,
+                "frame": 0.08,
                 "value": {
                   "__uuid__": "e26bbb15-44ba-4cbd-a34f-4e2220a53aca"
                 }
               },
               {
-                "frame": 0.05,
+                "frame": 0.12,
                 "value": {
                   "__uuid__": "0ea38c1e-ead5-445e-8e64-fcb54719aeb2"
                 }
               },
               {
-                "frame": 0.06666666666666667,
+                "frame": 0.16,
                 "value": {
                   "__uuid__": "5bf8bb2d-3eee-4972-9d3f-3ef89849b37f"
                 }
               },
               {
-                "frame": 0.08333333333333333,
+                "frame": 0.24,
                 "value": {
                   "__uuid__": "87825fd4-b566-44fd-9736-97529f6db685"
                 }
               },
               {
-                "frame": 0.1,
+                "frame": 0.32,
                 "value": {
                   "__uuid__": "89a10b83-e8da-415b-a84f-3cecd0bce0b5"
                 }
@@ -77,11 +56,76 @@
         "props": {
           "opacity": [
             {
-              "frame": 0,
+              "frame": 0.36,
               "value": 255
             },
             {
-              "frame": 0.13333333333333333,
+              "frame": 0.44,
+              "value": 0
+            }
+          ],
+          "scaleX": [
+            {
+              "frame": 0,
+              "value": 0.5
+            },
+            {
+              "frame": 0.08,
+              "value": 1.5
+            },
+            {
+              "frame": 0.36,
+              "value": 1
+            }
+          ],
+          "scaleY": [
+            {
+              "frame": 0,
+              "value": 0.5
+            },
+            {
+              "frame": 0.08,
+              "value": 1.5
+            },
+            {
+              "frame": 0.36,
+              "value": 1
+            }
+          ]
+        }
+      },
+      "score": {
+        "props": {
+          "position": [
+            {
+              "frame": 0,
+              "value": [
+                0,
+                0
+              ]
+            },
+            {
+              "frame": 0.6,
+              "value": [
+                0,
+                93.7
+              ]
+            },
+            {
+              "frame": 0.72,
+              "value": [
+                0,
+                80
+              ]
+            }
+          ],
+          "opacity": [
+            {
+              "frame": 0.6,
+              "value": 225.00001500000002
+            },
+            {
+              "frame": 0.8,
               "value": 0
             }
           ]
@@ -89,5 +133,33 @@
       }
     }
   },
-  "events": []
+  "events": [
+    {
+      "frame": 0.8,
+      "func": "hideFX",
+      "params": [
+        "hehe"
+      ]
+    },
+    {
+      "frame": 0.8,
+      "func": "",
+      "params": []
+    },
+    {
+      "frame": 0.8,
+      "func": "",
+      "params": []
+    },
+    {
+      "frame": 0.8,
+      "func": "",
+      "params": []
+    },
+    {
+      "frame": 0.8,
+      "func": "",
+      "params": []
+    }
+  ]
 }

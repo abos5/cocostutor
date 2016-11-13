@@ -47,12 +47,12 @@
     "__type__": "cc.Node",
     "_name": "game",
     "_objFlags": 0,
-    "_opacity": 255,
+    "_opacity": 225.00001500000002,
     "_color": {
       "__type__": "cc.Color",
       "r": 255,
       "g": 255,
-      "b": 255,
+      "b": 0,
       "a": 255
     },
     "_cascadeOpacityEnabled": true,
@@ -1068,6 +1068,9 @@
     "starPrefab": {
       "__uuid__": "7392f491-f24c-426c-a98a-ed51253301d5"
     },
+    "scoreFXPrefab": {
+      "__uuid__": "2750e1ea-a67c-427a-aa75-e0ec15745166"
+    },
     "maxStarDuration": 3,
     "minStarDuration": 4,
     "score": 0,
@@ -1091,9 +1094,6 @@
     },
     "gameFailed": {
       "__id__": 25
-    },
-    "scoreAudio": {
-      "__uuid__": "c2d7cac0-046d-4bfc-b7a6-f0c7164105ca"
     }
   }
 ]
