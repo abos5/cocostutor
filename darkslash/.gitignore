@@ -1,15 +1,3 @@
-# my regular gitignore file
-
-# cocos creator projects
-hellouniverse
-polished_project
-sample
-local
-tutorial-blackjack
-tutorial-dark-slash
-## project that crashed
-start_project
-
 #/////////////////////////////////////////////////////////////////////////////
 # Fireball Projects
 #/////////////////////////////////////////////////////////////////////////////
