@@ -97,13 +97,14 @@ cc.Class({
         if (this.remote) {
             return this.remote
         }
-
+        var self = this
         var begin = Date.now()
         this.remote = io.connect('ws://node.abos.space:3000');
         this.remote.on('connect', function(){
             cc.log(['spend:', Date.now() - begin, 'to connect'].join(' '))
         });
         this.remote.on('message', function(msg){
+            self.fpsDisplay.string = msg
             cc.log(msg)
         });
         this.remote.on('disconnect', function() {
@@ -201,7 +202,6 @@ cc.Class({
         // 每帧更新计时器，超过限度还没有生成新的星星
         this.timer += dt;
 
-        this.fpsDisplay.string = cc.game.config.frameRate.toString()
         // 就会调用游戏失败逻辑
         if (this.running && this.timer > this.starDuration) {
             this.gameOver();
