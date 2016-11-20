@@ -5,7 +5,22 @@
 3. 代码逻辑
     1. 在代码里很少看到不同组件之间的调用
     2. 初步体验是大部分调用与事件都是在 ccc 上进行绑定的?
-4.
+4. 看完了 UI 部分的 JS 代码, 感觉代码量很少, 但在突然间代码里的逻辑就被绑定起来了
+    1. 游戏开发的思想, 数据驱动的绑定逻辑还不熟
+    2. 简单扫了几眼 render 与 actor 的代码, 感觉也是不多
+5. 疑问:
+    1. 为什么没有全局管理器
+    2. dark-slash 的 demo 代码应该是用的旧的版本
+6. 未能掌握的:
+    1. lerp 是什么
+    2. 为什么 PoolMng 要用 return 做为方法名称
+    3. AnimHelper 里的 finishHandler 是什么鬼
+7. 初步了解的
+    1. eventManager 对于按钮时间的暂停监听
+    2. 通过 schedule 进行 callback 的调用
+    3. 组件的显示与隐藏通过 .active 属性来控制
+    4. 一些 ccc 的最佳实践
+    4. particle 的 resetSystem
 
 
 
