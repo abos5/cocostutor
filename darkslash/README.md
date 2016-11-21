@@ -20,7 +20,9 @@
     2. 通过 schedule 进行 callback 的调用
     3. 组件的显示与隐藏通过 .active 属性来控制
     4. 一些 ccc 的最佳实践
-    4. particle 的 resetSystem
+    5. particle 的 resetSystem
+    6. node.active 可以从逻辑上设置一个节点为隐藏
+    7. cc.hide() 则是返回一个动作, 用于 runAction 的动作中
 
 
 
