@@ -39,5 +39,5 @@
 ![code review mind map][review mind map]
 
 
-[review mind map]: https://on-img.com/chart_image/thumb/5831b5d4e4b06bc83a334f2d.png "代码阅读导图"
+[review mind map]: https://on-img.com/chart_image/thumb/58324beee4b05594f51bc996.png "代码阅读导图"
 [review mind link]: http://www.processon.com/view/link/58319f03e4b06bc83a32584a

@@ -5,9 +5,15 @@
   "author": "Cocos Creator",
   "main": "main.js",
   "main-menu": {
-    "Examples/Hello, abos": {
-      // message Package Name,
-      "message": "hello-abos:sayHello"
+    "Panel/view: binding tree": {
+      "message": "hello-abos:openBindingTreeView"
     }
+  },
+  "panel": {
+    "main": "panel/index.js",
+    "type": "dockable",
+    "title": "BindingTreeView",
+    "width": 400,
+    "height": 300
   }
 }

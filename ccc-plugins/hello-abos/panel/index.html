@@ -1,0 +1,11 @@
+<h2 v-text="title"></h2>
+<input v-model="source.fire" @keyup.enter="parseFire" />
+<span @click="parseFire"></span>
+<ui-section>
+    <ul >
+        <li v-for="(index, item) in items">
+            <span v-text="index"></span>
+            <span v-text="item.name" ></span>
+        </li>
+    </ul>
+</ui-section>
