@@ -1,11 +1,22 @@
-<h2 v-text="title"></h2>
-<input v-model="source.fire" @keyup.enter="parseFire" />
-<span @click="parseFire"></span>
+<ui-button
+v-if="false"
+v-for="(index, fire) in source.fires"
+@click="source.fire=index"
+v-text="fire.name"></ui-button>
+<hr v-if="false" />
+<ui-button
+    v-if="false"
+    v-for="(i_ipc, ipcMessage) in Ipc.messages"
+    v-text="ipcMessage.name"
+    @click="sendToMain(i_ipc)"
+></ui-button>
+
 <ui-section>
     <ul >
-        <li v-for="(index, item) in items">
-            <span v-text="index"></span>
-            <span v-text="item.name" ></span>
-        </li>
+        <node
+        class="item"
+        v-for="hierarchy in hierarchy.children"
+        :hierarchy="hierarchy" >
+        </node>
     </ul>
 </ui-section>
