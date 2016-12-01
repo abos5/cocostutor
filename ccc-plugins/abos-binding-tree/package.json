@@ -1,0 +1,22 @@
+{
+  "name": "abos-binding-tree",
+  "version": "0.1.0",
+  "description": "用来查看项目里的绑定情况",
+  "author": "Abos Freeman",
+  "main": "main.js",
+  "main-menu": {
+    "Panel/Binding Tree": {
+      "message": "abos-binding-tree:open"
+    }
+  },
+  "panel": {
+    "main": "panel/panel.js",
+    "type": "dockable",
+    "title": "Binding Tree View",
+    "width": 400,
+    "height": 600
+  },
+  "plugin": {
+    "name": ""
+  }
+}

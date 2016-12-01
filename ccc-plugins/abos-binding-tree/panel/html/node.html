@@ -8,12 +8,14 @@
         <span @click="logNode">view</span>
     </div>
     <ul v-show="open" v-if="isFolder">
-        <node
+        <children
         class="item"
         v-for="hierarchy in hierarchy.children"
         :source="source"
         :Ipc="Ipc"
         :hierarchy="hierarchy">
-        </node>
+        </children>
+        <compo>
+        </compo>
     </ul>
 </li>

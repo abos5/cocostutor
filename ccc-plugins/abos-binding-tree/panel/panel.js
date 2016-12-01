@@ -1,9 +1,8 @@
 // panel/index.js
 
-const fs = require('fs')
-const packageName = 'hello-abos'
+const fs       = require('fs')
 const encoding = 'utf8'
-const PATH = {
+const PATH     = {
     html: Editor.url('packages://hello-abos/panel/index.html'),
     nodeTemplate: Editor.url('packages://hello-abos/panel/node-template.html'),
     style: Editor.url('packages://hello-abos/panel/less.css')
@@ -16,7 +15,26 @@ Editor.Panel.extend({
     customProps: {
         nodeTemplate: fs.readFileSync(PATH.nodeTemplate, encoding)
     },
+
+    // ipc
+    messages: {
+
+    },
     ready () {
+
+        let path = ['packages:/', this.id, 'tools', 'plugin.js'].join('/')
+
+        Editor.import(path).then((Plugin) => {
+            return new Plugin(this.id, Editor)
+        })
+        // .then((plugin) => {
+        //     console.log(plugin)
+        // })
+        .then(function() {
+            console.log(arguments)
+        })
+
+
 
         Vue.component('node', {
             template: this.customProps.nodeTemplate,

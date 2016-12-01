@@ -24,7 +24,13 @@
     6. node.active 可以从逻辑上设置一个节点为隐藏
     7. cc.hide() 则是返回一个动作, 用于 runAction 的动作中
 
+# 插件历程
 
+1. 遇到的问题
+    1. 插件内的 vue 有bug，带 component 的 vue 实例 init 和 ready 的方法不会被调用
+    2. component 里的 ready 方法不会被调用
+2. 插件的名称命名为 Binding Tree
+3. 全称为 Abos Binding Tree
 
 # 应该怎么总结
 

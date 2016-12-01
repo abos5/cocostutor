@@ -1,7 +1,7 @@
 {
   "name": "hello-abos",
   "version": "0.0.1",
-  "description": "一份简单的扩展包",
+  "description": "一份简单的扩展包, 请勿删除， 保留了部分 一开始研究的代码",
   "author": "Cocos Creator",
   "main": "main.js",
   "main-menu": {
@@ -14,6 +14,6 @@
     "type": "dockable",
     "title": "BindingTreeView",
     "width": 400,
-    "height": 300
+    "height": 600
   }
 }
