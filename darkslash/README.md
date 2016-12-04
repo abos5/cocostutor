@@ -45,7 +45,6 @@
         >     html: 'html-path-rooted-from-package',
         >     js: 'js-path-rooted-from-package',
         > }
-    > 目前的问题就是， 如何初始化数据
 
 
 ### 测试 es6 的一些写法

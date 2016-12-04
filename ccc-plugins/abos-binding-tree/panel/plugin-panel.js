@@ -155,11 +155,14 @@ exports = {
         },
         toggleFoldComp() {
             this.source.showComp = !this.source.showComp
+            if (! this.source.showComp) {
+                this.source.showProp = false
+            }
         },
         toggleFoldProp() {
             this.source.showProp = !this.source.showProp
-            if (! this.source.showProp) {
-                this.source.showComp = false
+            if (this.source.showProp) {
+                this.source.showComp = true
             }
         },
         initManually() {
