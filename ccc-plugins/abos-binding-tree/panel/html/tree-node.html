@@ -1,0 +1,30 @@
+<li>
+    <div>
+        <div
+            v-show="hierarchy.display"
+            :class="{'tree-node': true, 'node-is-parent': isFolder}">
+            <span v-on:click="toggle" >
+                <span v-if="isFolder" class="tree-node-fold" v-text="open ? '-' : '+'" ></span>
+                <span v-else>&nbsp;&nbsp;</span>
+                <span class="tree-node-name" v-text="hierarchy.name" ></span>
+            </span>
+        </div>
+        <ul v-show="open && source.showComp">
+            <node-comp
+            class="node-comp"
+            v-for="comp in hierarchy.node.value.__comps__"
+            v-show="comp.display"
+            v-if="displayComp(comp)"
+            :source="source"
+            :comp="comp"
+            />
+        </ul>
+        <ul v-show="open && hierarchy.display" v-if="isFolder">
+            <tree-node
+            class="item"
+            v-for="hierarchy in hierarchy.children"
+            :source="source"
+            :hierarchy="hierarchy" />
+        </ul>
+    </div>
+</li>

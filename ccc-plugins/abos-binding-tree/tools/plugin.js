@@ -2,48 +2,111 @@
  * This plugin can and should only be initialize
  *  when Editor.Panel.ready
  *
- * ```js
- *
- *      Plugin = Editor.import([
- *          'packages://', this.id, 'tools', 'plugin.js'
- *      ].join('/'))
- *
- *      plugin = new Plugin(this.id)
- *
- * ```
- *
  */
 class Plugin {
 
     // methods
+    /**
+     * @return Promise
+     */
     constructor (id, Editor) {
 
+        // instantly register a global access
+        window.aplugin = this
+
         // props
-        this._package = null
-        this._id      = null
-        this._editor  = null
+        this._pkg     = null
+        this._id      = id
+        this._editor  = Editor
+        this.exp      = {}
+        this.res      = {}
 
-        this._id = id
-        this._editor = Editor
-
-        // package won't is not usable all the time.
-        Editor.import(this.getPackageUrl('package.json')).then((pkg) => {
-            this._package = JSON.parse(pkg)
-        })
+        return this.init()
     }
 
-    get package () {
-        return this._package
+    /**
+     * 直接占用 windows 全局空间
+     * @return Promise
+     */
+    init () {
+        return this.import('package.json')
+            // parse project configuration
+            .then((pkg) => {
+                this._pkg = JSON.parse(pkg)
+            })
+            // loading all resources before register Vue components
+            .then(() => Promise.all(this.pkg.abosPlugin.resources.map((path) => this.import(path.path)
+                .then((data) => {
+                    this.res[path.name] = data
+                })
+            )))
+            // register Vue components
+            .then(() => Promise.all(this.pkg.abosPlugin.vue.resources.map((path) => this.debug('begin loading:', path.name)
+                .import(path.js)
+                .then((js) => {
+                    path.compo = js
+                    return this.import(path.html)
+                })
+                .then((html) => {
+                    path.compo.template = html
+                    return Vue.component(path.name, path.compo)
+                })
+            )))
+            // just making sure all resources are ready
+            // and make sure this is that response last
+            .then(() => {
+                this.debug('done initialization, begin return Promise')
+                return this
+            })
     }
 
-    getPackageUrl (target) {
+    get pkg () {
+        return this._pkg
+    }
+
+    get editor () {
+        return this._editor
+    }
+
+    getPkgUrl (target) {
         return ["packages:/", this._id, target].join('/')
     }
 
+    /**
+     * simple import
+     * if more return data required
+     * please wrap it in another method
+     */
     import (target) {
-        return this.Editor.import(this.getPackageUrl(target))
+        return this.editor.import(this.getPkgUrl(target))
+    }
+
+    log() {
+        console.log(this.pkg.name, ...arguments)
+        return this
+    }
+
+    warning() {
+        console.warn(this.pkg.name, ...arguments)
+        return this
+    }
+
+    info() {
+        console.info(this.pkg.name, ...arguments)
+        return this
+    }
+
+    debug() {
+        console.debug(this.pkg.name, ...arguments)
+        return this
+    }
+
+    trace() {
+        console.trace(this.pkg.name, ...arguments)
+        return this
     }
 
 }
+
 
 exports = Plugin

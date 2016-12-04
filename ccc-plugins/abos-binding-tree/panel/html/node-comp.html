@@ -1,0 +1,17 @@
+<li>
+    <!--should at least have something in this -->
+    <div>
+        <div
+            :class="{'node-comp': true, matched:comp.matched}">
+            <span >&nbsp;&nbsp;</span>
+            <span v-text="matchedBy" ></span>
+            <span v-text="comp.matchBy" ></span>
+        </div>
+        <ul v-show="source.showProp">
+            <comp-prop
+            v-for="prop in comp.props"
+            :source="source"
+            :prop="prop" />
+        </ul>
+    </div>
+</li>

@@ -1,0 +1,6 @@
+<li v-show="! prop.excluded">
+    <div v-show="prop.display" :class="{'comp-prop': true, matched:prop.matched}">
+        <span>&nbsp;&nbsp;</span>
+        <span v-text="prop.matchBy" ></span>
+    </div>
+</li>

@@ -1,7 +1,7 @@
 {
   "name": "abos-binding-tree",
   "version": "0.1.0",
-  "description": "用来查看项目里的绑定情况",
+  "description": "用来查看项目里 当前场景的绑定情况",
   "author": "Abos Freeman",
   "main": "main.js",
   "main-menu": {
@@ -10,13 +10,48 @@
     }
   },
   "panel": {
-    "main": "panel/panel.js",
+    "main": "panel/index.js",
     "type": "dockable",
     "title": "Binding Tree View",
     "width": 400,
     "height": 600
   },
-  "plugin": {
-    "name": ""
+  "abosPlugin": {
+    "config": {
+      "description": "This is where plugin configuratons can define once and for all."
+    },
+    "resources": [
+      {
+        "name": "pluginPanel",
+        "path": "panel/plugin-panel.js"
+      }
+    ],
+    "comp_exclude": [
+      "<(Widget|Sprite|Label)>"
+    ],
+    "vue": {
+      "resources": [
+        {
+          "name": "plugin-panel",
+          "html": "panel/plugin-panel.html",
+          "js": "panel/plugin-panel.js"
+        },
+        {
+          "name": "tree-node",
+          "html": "panel/html/tree-node.html",
+          "js": "panel/components/tree-node.js"
+        },
+        {
+          "name": "node-comp",
+          "html": "panel/html/node-comp.html",
+          "js": "panel/components/node-comp.js"
+        },
+        {
+          "name": "comp-prop",
+          "html": "panel/html/comp-prop.html",
+          "js": "panel/components/comp-prop.js"
+        }
+      ]
+    }
   }
 }

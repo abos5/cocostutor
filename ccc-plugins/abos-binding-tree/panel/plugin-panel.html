@@ -1,0 +1,95 @@
+<div>
+<style>
+    /**
+    *   no way to import css rightfully
+    */
+    :host {
+        margin: 5px;
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+    h2 {
+        color: #f90;
+    }
+    body {
+        font-family: Menlo, Consolas, monospace;
+        color: #444;
+    }
+    .item {
+        cursor: pointer;
+    }
+    .bold {
+        font-weight: bold;
+    }
+    ul {
+        padding-left: 1em;
+        line-height: 1.5em;
+        list-style-type: none;
+    }
+
+    .tree-node {
+        color:#f9f9f9;
+    }
+    .tree-node:hover {
+        color:#ffa503;
+    }
+    .matched,.tree-node-text.matched,.node-comp.matched,.comp-prop.matched {
+        color: #f33;
+    }
+    .tree-node-fold
+    {
+        color:black;
+    }
+    .node-comp{
+        color:lightseagreen;
+    }
+    .node-comp:hover{
+        color:limegreen;
+    }
+    .comp-prop{
+        color:lightblue;
+    }
+    .comp-prop:hover{
+        color:deepskyblue;
+    }
+    .button-checkbox.button-checked {
+        color:lightgray;
+    }
+    .button-checkbox.button-unchecked{
+       color:slategrey;
+    }
+</style>
+
+    <!--search-->
+    <input v-model="source.search" />
+    <ui-button v-on:click="showExclude=!showExclude" >排除类型</ui-button>
+    <ui-button v-on:click="initManually" >重置</ui-button>
+    <hr />
+
+    <!--toggle prop type exclude-->
+    <ui-box-container v-show="showExclude">
+        <ui-button
+        :class="{'button-checkbox': true,'button-unchecked': source.typeExcludes.includes(type)}"
+        v-show="showExclude"
+        v-for="type in compTypes"
+        v-text="type"
+        v-on:click="toggleTypeExclude(type)" >
+        </ui-button><br />
+    </ui-box-container>
+    <!--toggle fold-->
+    <ui-button
+        :class="{'button-checkbox': true, 'button-unchecked': !source.showComp}"
+        v-on:click="toggleFoldComp">comp</ui-button>
+    <ui-button
+        :class="{'button-checkbox': true, 'button-unchecked': !source.showProp}"
+        v-on:click="toggleFoldProp">prop</ui-button>
+
+    <hr />
+
+    <ul >
+        <tree-node
+        v-for="child in hierarchy.children"
+        :source="source"
+        :hierarchy="child" />
+    </ul>
+</div>
