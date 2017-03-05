@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="left-down" width="60" height="90" tilewidth="16" tileheight="16" nextobjectid="1">
+ <tileset firstgid="1" name="colors" tilewidth="16" tileheight="16" tilecount="6" columns="0">
+  <tile id="0">
+   <image width="16" height="16" source="../textures/battlefield/background/background.png"/>
+  </tile>
+  <tile id="1">
+   <image width="16" height="16" source="../textures/battlefield/background/barricade.png"/>
+  </tile>
+  <tile id="2">
+   <image width="16" height="16" source="../textures/battlefield/background/mainstreet.png"/>
+  </tile>
+  <tile id="3">
+   <image width="16" height="16" source="../textures/battlefield/background/path.png"/>
+  </tile>
+  <tile id="4">
+   <image width="16" height="16" source="../textures/battlefield/background/sideway.png"/>
+  </tile>
+  <tile id="5">
+   <image width="16" height="16" source="../textures/battlefield/background/enemy.png"/>
+  </tile>
+ </tileset>
+ <layer name="background" width="60" height="90">
+  <data encoding="base64" compression="zlib">
+   eJztwwEJAAAMBKH7/qWXY6Dgqqmqqqqqqqqqqqqqqqqqqqqqqqqqqi8flzYVGQ==
+  </data>
+ </layer>
+ <layer name="friend-birth" width="60" height="90">
+  <data encoding="base64" compression="zlib">
+   eJztz8EJACAMBMH4sf+SLSHgR7zMwBawVcBrqymNX79Jpv0CAAAAAAAAAAAAAAAAAAAAANzaTWn8+k0y7Rd+dADMTwEZ
+  </data>
+ </layer>
+ <objectgroup name="friend-base"/>
+ <layer name="enemy-birth" width="60" height="90">
+  <data encoding="base64" compression="zlib">
+   eJztzzENAAAIwDAu/EtGAicE2mQCFgFMy6Zr/Pq95NsvAAAAAAAAAAAAAAAAAAAAAAAAsE8BVBYA8Q==
+  </data>
+ </layer>
+ <objectgroup name="enemy-birth"/>
+ <layer name="mainstreet" width="60" height="90">
+  <data encoding="base64" compression="zlib">
+   eJztz0ENACAMwMAl+PeMBb4d16QCbkaSJKnfeXxLvLy83Xh5ebvx8vJ24+Xl7cbLy9uNl5e3Gy8vbzdeXt5uvLy83Xh5ebvx8vJ24+Xl7cbLy9uNl5e3Gy8vbzdeXt5uvLy83Xh5N3klSdLfXW8cCHE=
+  </data>
+ </layer>
+ <layer name="side-way" width="60" height="90">
+  <data encoding="base64" compression="zlib">
+   eJzt3EENADAMA7Gq/EGXwL77JLYUAEcgMzTYx5LpzaYXAAAAAAAAAAAAAAAAAAAAAADgn7bvI73Z9NLiANDYAGU=
+  </data>
+ </layer>
+</map>

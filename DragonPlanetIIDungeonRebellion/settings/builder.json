@@ -1,0 +1,24 @@
+{
+  "appKey": "",
+  "appSecret": "",
+  "excludeScenes": [],
+  "includeAnySDK": false,
+  "includeSdk": [
+    "anysdk"
+  ],
+  "inlineSpriteFrames": true,
+  "mergeStartScene": false,
+  "oauthLoginServer": "",
+  "orientation": {
+    "landscapeLeft": true,
+    "landscapeRight": true,
+    "portrait": true,
+    "upsideDown": false
+  },
+  "packageName": "org.cocos2d.DragonPlanetIIDungeonRebellion",
+  "privateKey": "",
+  "renderMode": "0",
+  "startScene": "b0bc6b98-fdb8-426e-bc2a-e075f8d04532",
+  "title": "DragonPlanetIIDungeonRebellion",
+  "webOrientation": "portrait"
+}
